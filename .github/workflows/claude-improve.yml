@@ -1,0 +1,66 @@
+name: Claude Improve
+
+# Autonomous maintenance. Runs on a schedule and on demand; picks one project,
+# makes one improvement, and opens a pull request. Nothing lands without review
+# because the job only has permission to push a branch and open the PR.
+on:
+  schedule:
+    # 03:15 UTC on Mondays.
+    - cron: "15 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Project to improve (framework, games/leap, ...). Empty picks one at random."
+        required: false
+        type: string
+      task:
+        description: "What to do. Empty means 'choose one worthwhile improvement'."
+        required: false
+        type: string
+
+jobs:
+  improve:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Godot and gdtoolkit
+        uses: ./.github/actions/setup-godot
+
+      - name: Choose a project
+        id: pick
+        run: |
+          source tools/lib.sh
+          project="${{ inputs.project }}"
+          if [ -z "$project" ]; then
+            project="$(godotgo_projects | shuf -n 1)"
+          fi
+          echo "project=$project" >> "$GITHUB_OUTPUT"
+          echo "Improving $project"
+
+      - name: Baseline verification
+        run: tools/verify.sh "${{ steps.pick.outputs.project }}"
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          branch_prefix: "claude/improve-"
+          prompt: |
+            Improve the Godot project ${{ steps.pick.outputs.project }} in this workspace.
+
+            ${{ inputs.task || 'Choose ONE worthwhile improvement: a clearer rule, a real gameplay upgrade, a test that proves something the suite currently assumes, or a genuine bug. Prefer depth over breadth.' }}
+
+            Read CLAUDE.md first for the conventions. Rules belong in the project's
+            scripts/game.gd (a Session subclass); reuse the framework rather than
+            duplicating it. Say what you chose and why before you start.
+
+            You are done when `tools/verify.sh ${{ steps.pick.outputs.project }}` passes.
+            Then open a pull request describing the change and how you verified it.
+            Do not make sweeping unrelated edits.
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,Edit,Write,MultiEdit,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/smoke.sh*),Bash(tools/verify.sh*),Bash(tools/godot.sh --headless*),Bash(python3 tools/gen_assets.py*),Bash(git status*),Bash(git diff*)"
+            --max-budget-usd 15

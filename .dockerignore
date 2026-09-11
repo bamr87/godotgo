@@ -1,0 +1,5 @@
+.git
+**/.godot
+.venv
+build
+.claude/settings.local.json

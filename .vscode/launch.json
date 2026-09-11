@@ -1,0 +1,136 @@
+{
+	// Debug configurations for the GodotGo workspace.
+	//
+	// The repository root is not a Godot project, so every Godot configuration
+	// names the project it runs: a directory with its own project.godot. Each
+	// one also points `editor_path` at the engine this workspace pins and
+	// tools/install_godot.sh fetches, so F5 runs the same build as
+	// tools/verify.sh, the container and CI rather than whatever is on PATH.
+	//
+	// The `godot` configurations need the geequlim.godot-tools extension, which
+	// .vscode/extensions.json recommends. Without it VS Code reports the type as
+	// unsupported; the Python configuration works on its own.
+	"version": "0.2.0",
+	"inputs": [
+		{
+			"id": "project",
+			"type": "pickString",
+			"description": "Which project?",
+			"options": [
+				"framework",
+				"games/leap",
+				"games/orb-run",
+				"games/shift",
+				"games/swarm"
+			],
+			"default": "games/leap"
+		},
+		{
+			"id": "game",
+			"type": "pickString",
+			"description": "Which game?",
+			"options": [
+				"games/leap",
+				"games/orb-run",
+				"games/shift",
+				"games/swarm"
+			],
+			"default": "games/leap"
+		},
+		{
+			"id": "testFilter",
+			"type": "promptString",
+			"description": "Substring of a test file or method name. Empty runs every test.",
+			"default": ""
+		}
+	],
+	"configurations": [
+		{
+			"name": "Play: leap",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/games/leap",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"scene": "main"
+		},
+		{
+			"name": "Play: orb-run",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/games/orb-run",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"scene": "main"
+		},
+		{
+			"name": "Play: shift",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/games/shift",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"scene": "main"
+		},
+		{
+			"name": "Play: swarm",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/games/swarm",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"scene": "main"
+		},
+		{
+			// The scene open in the Godot editor, not the one focused in VS Code.
+			"name": "Play: current scene (pick a game)",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/${input:game}",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"scene": "current"
+		},
+		{
+			// Collision shapes and navigation drawn over the running game. The
+			// 2D games put their level geometry together from merged collision
+			// runs, so this is the quickest way to see what was actually built.
+			"name": "Play: with collision shapes (pick a game)",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/${input:game}",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"scene": "main",
+			"debug_collisions": true,
+			"debug_navigation": true
+		},
+		{
+			// Breakpoints inside tests/unit/. No scene runs: the runner extends
+			// SceneTree and is launched with --script, exactly as tools/test.sh
+			// does it, so a test behaves here the way it behaves at the gate.
+			// An empty filter runs every test.
+			"name": "Debug tests (pick a project)",
+			"type": "godot",
+			"request": "launch",
+			"project": "${workspaceFolder}/${input:project}",
+			"editor_path": "${workspaceFolder}/.godot-bin/godot",
+			"additional_options": "--headless --script res://addons/godotgo/testing/test_runner.gd -- --filter=${input:testFilter}"
+		},
+		{
+			// For a game started outside VS Code, including tools/run.sh and a
+			// game played from the Godot editor. 6007 is the port godot-tools
+			// and the editor both default to.
+			"name": "Attach to a running Godot",
+			"type": "godot",
+			"request": "attach",
+			"address": "127.0.0.1",
+			"port": 6007
+		},
+		{
+			// Placeholder art is generated, never drawn. This is the one part of
+			// the workspace that is Python, and it needs no Godot at all.
+			"name": "Python: regenerate assets",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/tools/gen_assets.py",
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"args": []
+		}
+	]
+}

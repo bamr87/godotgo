@@ -1,0 +1,15 @@
+# gdlint configuration (gdtoolkit), used by tools/check.sh.
+#
+# excluded_directories only affects directory recursion; tools/check.sh passes
+# an explicit file list, so the shared addon under framework/addons/ is linted
+# through the framework project and skipped in the games that symlink it.
+excluded_directories:
+  - .git
+  - .godot
+  - .venv
+  - build
+max-line-length: 100
+disable:
+  # A test suite is one public method per case, so this limit fires on
+  # well-organised suites rather than on real complexity.
+  - max-public-methods

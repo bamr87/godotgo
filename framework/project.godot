@@ -1,0 +1,24 @@
+; GodotGo framework project.
+;
+; This project exists so the shared addon in addons/godotgo has a home that can
+; be imported, linted and unit-tested on its own. Games symlink addons/godotgo
+; here and add their own scenes, scripts and tests.
+
+config_version=5
+
+[application]
+
+config/name="GodotGo Framework"
+config/description="Reusable Godot 4 game framework: session lifecycle, save system, pooling, state machines, deterministic RNG, grid parsing and a headless test runner."
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godotgo/plugin.cfg")
+
+[physics]
+
+3d/default_gravity=9.8
+
+[autoload]
+

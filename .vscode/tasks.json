@@ -1,0 +1,45 @@
+{
+	"version": "2.0.0",
+	"inputs": [
+		{
+			"id": "project",
+			"type": "promptString",
+			"description": "Project (framework, orb-run, leap, swarm, shift). Empty means all.",
+			"default": ""
+		}
+	],
+	"tasks": [
+		{
+			"label": "GodotGo: verify all",
+			"type": "shell",
+			"command": "tools/verify.sh",
+			"problemMatcher": [],
+			"group": { "kind": "test", "isDefault": true }
+		},
+		{
+			"label": "GodotGo: verify one",
+			"type": "shell",
+			"command": "tools/verify.sh ${input:project}",
+			"problemMatcher": []
+		},
+		{
+			"label": "GodotGo: run a game",
+			"type": "shell",
+			"command": "tools/run.sh ${input:project}",
+			"problemMatcher": [],
+			"group": { "kind": "build", "isDefault": true }
+		},
+		{
+			"label": "GodotGo: open a project in the editor",
+			"type": "shell",
+			"command": "tools/godot.sh --editor --path \"${workspaceFolder}/games/${input:project}\"",
+			"problemMatcher": []
+		},
+		{
+			"label": "GodotGo: new game",
+			"type": "shell",
+			"command": "tools/new_game.sh ${input:project}",
+			"problemMatcher": []
+		}
+	]
+}

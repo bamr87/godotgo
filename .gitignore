@@ -1,0 +1,38 @@
+# Godot 4+
+.godot/
+/android/
+
+# Exports
+build/
+export.cfg
+export_credentials.cfg
+*.translation
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python tooling (gdtoolkit)
+.venv/
+
+# Editors
+*.swp
+*.swo
+.idea/
+*.iml
+
+# Local Material Maker scratch (keep committed exports)
+*.mm.tmp
+
+# Claude Code per-machine settings (Godot path, personal permissions)
+.claude/settings.local.json
+
+# Workspace-pinned Godot (tools/install_godot.sh)
+.godot-bin/
+
+# Third-party addons fetched by tools/install_godot_ai.sh, and the per-project
+# symlinks pointing into them. Vendored code is a dependency, not our source.
+vendor/
+/framework/addons/godot_ai
+/games/*/addons/godot_ai
+/templates/*/addons/godot_ai

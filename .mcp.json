@@ -1,0 +1,33 @@
+{
+	"mcpServers": {
+		"godot": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@coding-solo/godot-mcp"
+			],
+			"env": {
+				"GODOT_PATH": "${CLAUDE_PROJECT_DIR}/tools/godot.sh"
+			}
+		},
+		"godot-docker": {
+			"command": "docker",
+			"args": [
+				"compose",
+				"-f",
+				"${CLAUDE_PROJECT_DIR}/docker/compose.yml",
+				"run",
+				"--rm",
+				"-i",
+				"--no-TTY",
+				"mcp"
+			]
+		},
+		"godot-ai": {
+			"command": "${CLAUDE_PROJECT_DIR}/tools/godot_ai.sh",
+			"args": [
+				"attach"
+			]
+		}
+	}
+}

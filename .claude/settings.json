@@ -1,0 +1,52 @@
+{
+	"$schema": "https://json.schemastore.org/claude-code-settings.json",
+	"enableAllProjectMcpServers": true,
+	"permissions": {
+		"allow": [
+			"Bash(tools/check.sh*)",
+			"Bash(tools/test.sh*)",
+			"Bash(tools/smoke.sh*)",
+			"Bash(tools/verify.sh*)",
+			"Bash(tools/run.sh*)",
+			"Bash(tools/export.sh*)",
+			"Bash(tools/new_game.sh*)",
+			"Bash(tools/mm.sh*)",
+			"Bash(tools/godot.sh --headless*)",
+			"Bash(tools/docker.sh*)",
+			"Bash(python3 tools/gen_assets.py*)",
+			"Bash(.venv/bin/gdlint*)",
+			"Bash(.venv/bin/gdformat*)",
+			"Bash(gdlint*)",
+			"Bash(gdformat --check*)",
+			"Bash(git status*)",
+			"Bash(git diff*)",
+			"Bash(git log*)",
+			"Bash(tools/godot_ai.sh doctor*)",
+			"Bash(tools/godot_ai.sh status*)",
+			"Bash(tools/install_godot_ai.sh*)"
+		],
+		"deny": [
+			"Edit(./**/.godot/**)",
+			"Write(./**/.godot/**)",
+			"Read(./**/export_credentials.cfg)",
+			"Edit(./vendor/**)",
+			"Write(./vendor/**)",
+			"Edit(./**/addons/godot_ai/**)",
+			"Write(./**/addons/godot_ai/**)"
+		]
+	},
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "Edit|Write|MultiEdit",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gd-check.sh",
+						"timeout": 60
+					}
+				]
+			}
+		]
+	}
+}

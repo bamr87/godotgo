@@ -1,0 +1,50 @@
+name: Setup Godot
+description: Install a headless-capable Godot 4 editor plus gdtoolkit, so the workspace's tools/*.sh scripts run on a bare runner.
+inputs:
+  version:
+    description: Godot release tag. Empty reads the pinned version from tools/lib.sh, which is where the workspace records the engine it targets.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Resolve the pinned Godot version
+      id: pin
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -n "${{ inputs.version }}" ]; then
+          echo "tag=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+        else
+          source tools/lib.sh
+          echo "tag=${GODOTGO_GODOT_VERSION}-${GODOTGO_GODOT_RELEASE}" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Cache Godot
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/godot
+        key: godot-${{ steps.pin.outputs.tag }}-linux-x86_64
+    - name: Download Godot
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        v="${{ steps.pin.outputs.tag }}"
+        mkdir -p ~/.local/godot
+        curl -fsSL -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/${v}/Godot_v${v}_linux.x86_64.zip"
+        unzip -q /tmp/godot.zip -d ~/.local/godot
+        mv ~/.local/godot/Godot_v${v}_linux.x86_64 ~/.local/godot/godot
+        chmod +x ~/.local/godot/godot
+    - name: Expose Godot on PATH
+      shell: bash
+      run: |
+        echo "$HOME/.local/godot" >> "$GITHUB_PATH"
+        echo "GODOT_BIN=$HOME/.local/godot/godot" >> "$GITHUB_ENV"
+        "$HOME/.local/godot/godot" --version
+    - name: Install gdtoolkit
+      shell: bash
+      run: |
+        python3 -m venv .venv
+        .venv/bin/pip install -q "gdtoolkit==4.*"
+        .venv/bin/gdlint --version || true

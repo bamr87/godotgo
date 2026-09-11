@@ -1,0 +1,54 @@
+name: godotgo
+
+# The whole workspace is mounted, not a single game, because the tools take a
+# project name and every project shares one framework checkout.
+x-tools: &tools
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+    args:
+      # 1 bakes the Linux export templates for this CPU (~130 MB) so
+      # tools/docker.sh export works.
+      WITH_EXPORT_TEMPLATES: "${WITH_EXPORT_TEMPLATES:-0}"
+      # tools/docker.sh passes the version from tools/lib.sh, which is the one
+      # place the targeted Godot release is written down.
+      GODOT_VERSION: "${GODOT_VERSION:-4.7.2}"
+  image: godotgo-tools:local
+  working_dir: /workspace
+  volumes:
+    - ..:/workspace
+  environment:
+    GODOT_BIN: /usr/local/bin/godot
+
+services:
+  # One-shot tool runner: tools/docker.sh verify|check|test|smoke|export|shell
+  godot:
+    <<: *tools
+
+  # Godot MCP server over stdio for Claude Code (.mcp.json "godot-docker").
+  # Runs under Xvfb so run_project can open a (virtual) window.
+  mcp:
+    <<: *tools
+    stdin_open: true
+    tty: false
+    entrypoint: ["/usr/local/bin/godotgo-mcp-entrypoint"]
+
+  # Material Maker CLI export, built from source for the host CPU.
+  # MM_DOCKERFILE=docker/Dockerfile.material-maker selects the upstream x86_64
+  # release instead (amd64 hosts only).
+  material-maker:
+    build:
+      context: ..
+      dockerfile: ${MM_DOCKERFILE:-docker/Dockerfile.material-maker-src}
+      args:
+        # Material Maker is exported with the workspace's own pinned editor, so
+        # bumping tools/lib.sh and rebuilding is all it takes to keep them level.
+        GODOT_VERSION: "${GODOT_VERSION:-4.7.2}"
+    image: godotgo-material-maker:local
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+      - mm-data:/root/.local/share
+
+volumes:
+  mm-data:

@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="__UID_MAIN__"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="__UID_HUD__" path="res://scenes/ui/hud.tscn" id="2_hud"]
+[ext_resource type="Script" path="res://addons/godotgo/ui/debug_overlay.gd" id="3_debug"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+goal = 3
+time_limit = 30.0
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 960.0
+offset_bottom = 540.0
+color = Color(0.1, 0.12, 0.16, 1)
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("3_debug")

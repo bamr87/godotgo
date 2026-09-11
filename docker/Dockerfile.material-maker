@@ -1,0 +1,42 @@
+# syntax=docker/dockerfile:1.7
+# Material Maker for command-line material export. Material Maker only ships
+# Linux x86_64 builds, so this image is always linux/amd64 (emulated on Apple
+# Silicon via Docker Desktop's Rosetta/QEMU). Texture generation renders through
+# Vulkan, so the container runs under Xvfb with Mesa's lavapipe CPU Vulkan driver.
+#
+# Use: tools/mm.sh <material.ptex> [output-dir]   or   tools/docker.sh mm -- <args>
+FROM --platform=linux/amd64 ubuntu:24.04
+
+ARG MM_VERSION=1.7
+ENV DEBIAN_FRONTEND=noninteractive MM_VERSION=${MM_VERSION}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		ca-certificates curl xz-utils bash coreutils vulkan-tools \
+		xvfb xauth \
+		libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxext6 libxrender1 libxkbcommon0 \
+		libgl1 libegl1 libgl1-mesa-dri mesa-vulkan-drivers libvulkan1 \
+		libasound2t64 libpulse0 libfontconfig1 libdbus-1-3 libudev1 \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+	v_us="$(echo "${MM_VERSION}" | tr . _)"; \
+	curl -fsSL -o /tmp/mm.tar.gz "https://github.com/RodZill4/material-maker/releases/download/${MM_VERSION}/material_maker_${v_us}_linux.tar.gz"; \
+	mkdir -p /opt; tar -xzf /tmp/mm.tar.gz -C /opt; \
+	mv "/opt/material_maker_${v_us}_linux" /opt/material-maker; \
+	chmod +x /opt/material-maker/material_maker.x86_64; \
+	rm /tmp/mm.tar.gz; \
+	ls /opt/material-maker
+
+# lavapipe (CPU Vulkan) + software GL; Dummy audio is already set by Material Maker's project.
+ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json \
+	LIBGL_ALWAYS_SOFTWARE=1 \
+	GALLIUM_DRIVER=llvmpipe \
+	XDG_DATA_HOME=/root/.local/share \
+	XDG_CONFIG_HOME=/root/.config \
+	MM_TIMEOUT=900
+
+WORKDIR /project
+COPY docker/mm-entrypoint.sh /usr/local/bin/mm-entrypoint
+RUN chmod +x /usr/local/bin/mm-entrypoint
+ENTRYPOINT ["/usr/local/bin/mm-entrypoint"]
+CMD ["--help"]

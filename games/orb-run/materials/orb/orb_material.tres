@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cm8vrpx6nspje"]
+
+[ext_resource type="Shader" path="res://materials/orb/orb.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/base_color = Color(0.25, 0.85, 1, 1)
+shader_parameter/pulse_speed = 3.0
+shader_parameter/emission_strength = 1.5

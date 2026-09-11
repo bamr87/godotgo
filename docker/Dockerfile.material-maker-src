@@ -1,0 +1,83 @@
+# syntax=docker/dockerfile:1.7
+# Material Maker built from source for the host architecture (amd64 or arm64),
+# so it runs natively everywhere instead of under emulation. The build stage
+# uses the headless Godot editor to export Material Maker's own project as a
+# debug build (see the comment at the export step for why).
+ARG UBUNTU_VERSION=24.04
+
+# --- build: export Material Maker with the Godot editor -----------------------
+FROM ubuntu:${UBUNTU_VERSION} AS build
+ARG GODOT_VERSION=4.7.2
+ARG GODOT_RELEASE=stable
+ARG MM_VERSION=1.7
+ARG TARGETARCH
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		ca-certificates curl unzip git \
+	&& rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+	case "${TARGETARCH}" in amd64) A=x86_64 ;; arm64) A=arm64 ;; *) exit 1 ;; esac; \
+	tag="${GODOT_VERSION}-${GODOT_RELEASE}"; \
+	base="https://github.com/godotengine/godot-builds/releases/download/${tag}"; \
+	curl -fsSL -o /tmp/godot.zip "${base}/Godot_v${tag}_linux.${A}.zip"; \
+	unzip -q /tmp/godot.zip -d /tmp/godot; \
+	install -m 0755 "/tmp/godot/Godot_v${tag}_linux.${A}" /usr/local/bin/godot; \
+	rm -rf /tmp/godot /tmp/godot.zip; \
+	dest="/root/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_RELEASE}"; \
+	mkdir -p "${dest}"; \
+	curl -fsSL -o /tmp/templates.tpz "${base}/Godot_v${tag}_export_templates.tpz"; \
+	unzip -q -j /tmp/templates.tpz "templates/linux_debug.${A}" "templates/version.txt" -d "${dest}"; \
+	rm /tmp/templates.tpz; ls -la "${dest}"
+RUN git clone --depth 1 --branch "${MM_VERSION}" https://github.com/RodZill4/material-maker.git /src
+WORKDIR /src
+RUN set -eux; \
+	case "${TARGETARCH}" in amd64) A=x86_64 ;; arm64) A=arm64 ;; esac; \
+	# Retarget every Linux preset's architecture to this build's; only "Linux/X11" is exported below.
+	sed -i "s/binary_format\/architecture=\"[^\"]*\"/binary_format\/architecture=\"${A}\"/" export_presets.cfg; \
+	grep -nE '^name=|architecture=' export_presets.cfg
+RUN set -eux; \
+	case "${TARGETARCH}" in amd64) A=x86_64 ;; arm64) A=arm64 ;; esac; \
+	# Same pre-export step as Material Maker's release workflow.
+	cp -f material_maker/theme/default_theme_icons.svg material_maker/theme/default_theme_icons_export.svg; \
+	godot --headless --path /src --import >/dev/null 2>&1 || true; \
+	mkdir -p /opt/material-maker; \
+	# Debug export on purpose: the optimized release template segfaults while
+	# loading node definitions under Xvfb + lavapipe (both arm64 native and x86_64);
+	# the debug template exports correctly and prints script backtraces on failure.
+	godot --headless --path /src --export-debug "Linux/X11" "/opt/material-maker/material_maker.${A}" 2>&1 | tail -5; \
+	test -x "/opt/material-maker/material_maker.${A}"; \
+	# Data directories the release binary reads next to the executable (user nodes,
+	# library, examples, environments, meshes, export profiles), as packaged by upstream CI.
+	cp -R addons/material_maker/nodes /opt/material-maker/nodes; \
+	cp -R material_maker/environments /opt/material-maker/environments; \
+	cp -R material_maker/examples /opt/material-maker/examples; \
+	cp -R material_maker/library /opt/material-maker/library; \
+	cp -R material_maker/meshes /opt/material-maker/meshes; \
+	cp -R material_maker/misc/export /opt/material-maker/export; \
+	ln -s "/opt/material-maker/material_maker.${A}" /opt/material-maker/material_maker; \
+	ls -la /opt/material-maker
+
+# --- runtime ------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_VERSION}
+ARG MM_VERSION=1.7
+ENV DEBIAN_FRONTEND=noninteractive MM_VERSION=${MM_VERSION}
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		ca-certificates bash coreutils vulkan-tools \
+		xvfb xauth \
+		libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxext6 libxrender1 libxkbcommon0 \
+		libgl1 libegl1 libgl1-mesa-dri mesa-vulkan-drivers libvulkan1 \
+		libasound2t64 libpulse0 libfontconfig1 libdbus-1-3 libudev1 \
+	&& rm -rf /var/lib/apt/lists/*
+COPY --from=build /opt/material-maker /opt/material-maker
+ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json \
+	LIBGL_ALWAYS_SOFTWARE=1 \
+	GALLIUM_DRIVER=llvmpipe \
+	XDG_DATA_HOME=/root/.local/share \
+	XDG_CONFIG_HOME=/root/.config \
+	MM_BIN=/opt/material-maker/material_maker \
+	MM_TIMEOUT=900
+WORKDIR /project
+COPY docker/mm-entrypoint.sh /usr/local/bin/mm-entrypoint
+RUN chmod +x /usr/local/bin/mm-entrypoint
+ENTRYPOINT ["/usr/local/bin/mm-entrypoint"]
+CMD ["--help"]

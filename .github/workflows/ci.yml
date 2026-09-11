@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Every project in the workspace is checked, tested and smoke-booted inside the
+# same container image the maintainers use locally, so a green run here and a
+# green `tools/verify.sh` on a laptop mean the same thing.
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.list.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: list
+        name: List Godot projects
+        run: |
+          source tools/lib.sh
+          printf 'projects=' >> "$GITHUB_OUTPUT"
+          godotgo_projects | jq -R . | jq -sc . >> "$GITHUB_OUTPUT"
+
+  verify:
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.discover.outputs.projects) }}
+    name: verify ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build toolchain image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          tags: godotgo-tools:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify
+        run: tools/docker.sh verify ${{ matrix.project }}
+
+  assets-are-reproducible:
+    runs-on: ubuntu-latest
+    name: generated assets are reproducible
+    steps:
+      - uses: actions/checkout@v6
+      - name: Regenerate and diff
+        run: |
+          python3 tools/gen_assets.py
+          if ! git diff --quiet; then
+            echo "::error::tools/gen_assets.py produced different bytes than are committed"
+            git --no-pager diff --stat
+            exit 1
+          fi
+          echo "generated assets match the committed files"

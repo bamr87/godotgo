@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=3 format=3 uid="uid://j3wy1mqt6e6h"]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Texture2D" path="res://assets/textures/brute.png" id="2_texture"]
+
+[resource]
+script = ExtResource("1_stats")
+kind = &"brute"
+texture = ExtResource("2_texture")
+radius = 13.0
+max_health = 4
+speed = 78.0
+acceleration = 380.0
+attack_range = 30.0
+attack_damage = 1
+attack_cooldown = 1.3
+spawn_time = 1.0
+score_value = 80

@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3 uid="uid://ccny5rwuf67nd"]
+
+[ext_resource type="Script" path="res://scripts/orb.gd" id="1_orb"]
+[ext_resource type="Mesh" path="res://assets/models/orb.obj" id="2_mesh"]
+[ext_resource type="Material" path="res://materials/orb/orb_material.tres" id="3_material"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_orb"]
+radius = 0.6
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_burst"]
+direction = Vector3(0, 1, 0)
+spread = 180.0
+initial_velocity_min = 2.0
+initial_velocity_max = 4.0
+gravity = Vector3(0, -4, 0)
+scale_min = 0.5
+scale_max = 1.0
+color = Color(0.25, 0.85, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_spark"]
+vertex_color_use_as_albedo = true
+emission_enabled = true
+emission = Color(0.25, 0.85, 1, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_spark"]
+material = SubResource("StandardMaterial3D_spark")
+radius = 0.06
+height = 0.12
+
+[node name="Orb" type="Area3D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_orb")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_orb")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_mesh")
+material_override = ExtResource("3_material")
+
+[node name="Particles" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 24
+lifetime = 0.6
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_burst")
+draw_pass_1 = SubResource("SphereMesh_spark")

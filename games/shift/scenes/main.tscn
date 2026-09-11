@@ -1,0 +1,52 @@
+[gd_scene load_steps=14 format=3 uid="uid://coe82v8lklnp"]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/board_view.gd" id="2_board"]
+[ext_resource type="PackedScene" uid="uid://cqxmkie4wlkeu" path="res://scenes/ui/hud.tscn" id="3_hud"]
+[ext_resource type="Script" path="res://addons/godotgo/ui/debug_overlay.gd" id="4_debug"]
+[ext_resource type="Texture2D" path="res://assets/textures/wall.png" id="5_wall"]
+[ext_resource type="Texture2D" path="res://assets/textures/floor.png" id="6_floor"]
+[ext_resource type="Texture2D" path="res://assets/textures/target.png" id="7_target"]
+[ext_resource type="Texture2D" path="res://assets/textures/crate.png" id="8_crate"]
+[ext_resource type="Texture2D" path="res://assets/textures/crate_done.png" id="9_crate_done"]
+[ext_resource type="Texture2D" path="res://assets/textures/mover.png" id="10_mover"]
+[ext_resource type="AudioStream" path="res://assets/audio/step.wav" id="11_step"]
+[ext_resource type="AudioStream" path="res://assets/audio/push.wav" id="12_push"]
+[ext_resource type="AudioStream" path="res://assets/audio/solved.wav" id="13_solved"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_level")
+starting_level = 1
+time_limit = 0.0
+board_margin_left = 250.0
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 960.0
+offset_bottom = 540.0
+color = Color(0.08, 0.09, 0.12, 1)
+
+[node name="Board" type="Node2D" parent="."]
+script = ExtResource("2_board")
+cell_size = 48
+wall_texture = ExtResource("5_wall")
+floor_texture = ExtResource("6_floor")
+target_texture = ExtResource("7_target")
+crate_texture = ExtResource("8_crate")
+crate_done_texture = ExtResource("9_crate_done")
+mover_texture = ExtResource("10_mover")
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="StepSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_step")
+volume_db = -6.0
+
+[node name="PushSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_push")
+volume_db = -4.0
+
+[node name="SolvedSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("13_solved")
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("4_debug")

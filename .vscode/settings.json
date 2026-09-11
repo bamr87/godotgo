@@ -1,0 +1,17 @@
+{
+	"files.exclude": {
+		"**/.godot": true
+	},
+	"search.exclude": {
+		"**/.godot": true,
+		"**/build": true,
+		".venv": true
+	},
+	"files.insertFinalNewline": true,
+	"editor.insertSpaces": false,
+	"editor.tabSize": 4,
+	"[gdscript]": {
+		"editor.insertSpaces": false,
+		"editor.tabSize": 4
+	}
+}

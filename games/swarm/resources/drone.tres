@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=3 format=3 uid="uid://daxum3wl7wkkh"]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_stats.gd" id="1_stats"]
+[ext_resource type="Texture2D" path="res://assets/textures/drone.png" id="2_texture"]
+
+[resource]
+script = ExtResource("1_stats")
+kind = &"drone"
+texture = ExtResource("2_texture")
+radius = 9.0
+max_health = 1
+speed = 140.0
+acceleration = 900.0
+attack_range = 22.0
+attack_damage = 1
+attack_cooldown = 0.9
+spawn_time = 0.6
+score_value = 25

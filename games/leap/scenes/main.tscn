@@ -1,0 +1,66 @@
+[gd_scene load_steps=14 format=3 uid="uid://ba7tgpfg16bee"]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://rowresllguu2" path="res://scenes/hero.tscn" id="2_hero"]
+[ext_resource type="PackedScene" uid="uid://bkcpaktphyn0g" path="res://scenes/coin.tscn" id="3_coin"]
+[ext_resource type="PackedScene" uid="uid://c73f01aqvs1sa" path="res://scenes/hazard.tscn" id="4_hazard"]
+[ext_resource type="PackedScene" uid="uid://dogycv77fforo" path="res://scenes/goal.tscn" id="5_goal"]
+[ext_resource type="PackedScene" uid="uid://cfmbjqahwqyo5" path="res://scenes/ui/hud.tscn" id="6_hud"]
+[ext_resource type="Texture2D" path="res://assets/textures/brick.png" id="7_tile"]
+[ext_resource type="Texture2D" path="res://assets/textures/platform.png" id="8_platform"]
+[ext_resource type="AudioStream" path="res://assets/audio/coin.wav" id="9_coin_sfx"]
+[ext_resource type="AudioStream" path="res://assets/audio/jump.wav" id="10_jump_sfx"]
+[ext_resource type="AudioStream" path="res://assets/audio/hurt.wav" id="11_hurt_sfx"]
+[ext_resource type="Script" path="res://scripts/moving_platform.gd" id="12_platform"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(96, 24)
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_level")
+coin_scene = ExtResource("3_coin")
+hazard_scene = ExtResource("4_hazard")
+goal_scene = ExtResource("5_goal")
+tile_texture = ExtResource("7_tile")
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Colour" type="ColorRect" parent="Background"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.11, 0.13, 0.2, 1)
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="MovingPlatform" type="AnimatableBody2D" parent="."]
+position = Vector2(672, 288)
+collision_layer = 1
+collision_mask = 0
+sync_to_physics = true
+script = ExtResource("12_platform")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MovingPlatform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Sprite2D" type="Sprite2D" parent="MovingPlatform"]
+texture = ExtResource("8_platform")
+scale = Vector2(6, 1.5)
+
+[node name="Hero" parent="." instance=ExtResource("2_hero")]
+position = Vector2(96, 128)
+
+[node name="HUD" parent="." instance=ExtResource("6_hud")]
+
+[node name="CoinSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("9_coin_sfx")
+
+[node name="JumpSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_jump_sfx")
+
+[node name="HurtSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_hurt_sfx")

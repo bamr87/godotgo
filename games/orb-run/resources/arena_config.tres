@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="LevelConfig" load_steps=2 format=3 uid="uid://dlxymna3lqlef"]
+
+[ext_resource type="Script" path="res://scripts/resources/level_config.gd" id="1_config"]
+
+[resource]
+script = ExtResource("1_config")
+title = "Orb Run"
+time_limit = 90.0
+kill_y = -10.0
+land_sound_min_fall_speed = 6.0

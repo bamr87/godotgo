@@ -1,0 +1,110 @@
+[gd_scene load_steps=15 format=3 uid="uid://c8ut054h8o36y"]
+
+[ext_resource type="Script" path="res://scripts/arena.gd" id="1_arena"]
+[ext_resource type="Resource" uid="uid://daxum3wl7wkkh" path="res://resources/drone.tres" id="2_drone"]
+[ext_resource type="Resource" uid="uid://j3wy1mqt6e6h" path="res://resources/brute.tres" id="3_brute"]
+[ext_resource type="PackedScene" uid="uid://crvgkb04t36sq" path="res://scenes/ship.tscn" id="4_ship"]
+[ext_resource type="PackedScene" uid="uid://bsbynhmrijcp" path="res://scenes/enemy.tscn" id="5_enemy"]
+[ext_resource type="PackedScene" uid="uid://dvch6yi81dq8y" path="res://scenes/bullet.tscn" id="6_bullet"]
+[ext_resource type="PackedScene" uid="uid://bwu2381rbsibs" path="res://scenes/ui/hud.tscn" id="7_hud"]
+[ext_resource type="Script" path="res://addons/godotgo/util/object_pool.gd" id="8_pool"]
+[ext_resource type="Script" path="res://addons/godotgo/ui/debug_overlay.gd" id="9_debug"]
+[ext_resource type="AudioStream" path="res://assets/audio/shoot.wav" id="10_shoot"]
+[ext_resource type="AudioStream" path="res://assets/audio/hit.wav" id="11_hit"]
+[ext_resource type="AudioStream" path="res://assets/audio/wave.wav" id="12_wave"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h"]
+size = Vector2(960, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v"]
+size = Vector2(16, 508)
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_arena")
+waves_to_survive = 5
+wave_seed = 20260909
+base_enemies = 3
+enemies_per_wave = 2
+max_enemies_per_wave = 14
+wave_break = 1.6
+wall_thickness = 16.0
+spawn_inset = 20.0
+enemy_scene = ExtResource("5_enemy")
+drone_stats = ExtResource("2_drone")
+brute_stats = ExtResource("3_brute")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 960.0
+offset_bottom = 540.0
+color = Color(0.18, 0.2, 0.27, 1)
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 944.0
+offset_bottom = 524.0
+color = Color(0.08, 0.09, 0.13, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="Top" type="StaticBody2D" parent="Walls"]
+position = Vector2(480, 8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Top"]
+shape = SubResource("RectangleShape2D_h")
+
+[node name="Bottom" type="StaticBody2D" parent="Walls"]
+position = Vector2(480, 532)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Bottom"]
+shape = SubResource("RectangleShape2D_h")
+
+[node name="Left" type="StaticBody2D" parent="Walls"]
+position = Vector2(8, 270)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Left"]
+shape = SubResource("RectangleShape2D_v")
+
+[node name="Right" type="StaticBody2D" parent="Walls"]
+position = Vector2(952, 270)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/Right"]
+shape = SubResource("RectangleShape2D_v")
+
+[node name="Bullets" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="BulletPool" type="Node" parent="."]
+script = ExtResource("8_pool")
+scene = ExtResource("6_bullet")
+initial_size = 16
+max_size = 48
+
+[node name="WaveTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="Ship" parent="." instance=ExtResource("4_ship")]
+position = Vector2(480, 270)
+
+[node name="HUD" parent="." instance=ExtResource("7_hud")]
+
+[node name="ShootSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_shoot")
+
+[node name="HitSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_hit")
+
+[node name="WaveSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_wave")
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("9_debug")
