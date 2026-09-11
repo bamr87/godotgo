@@ -1,0 +1,7 @@
+aabbccddaa
+abbccddaab
+bbccddaabb
+bccddaabbc
+ccddaabbcc
+cddaabbccd
+ddaabbccdd

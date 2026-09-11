@@ -7,7 +7,7 @@ GodotGo is a workspace for building Godot 4 games: a reusable framework, several
 The repository root is **not** a Godot project. A project is any directory with a `project.godot`:
 
 - `framework/` — the shared addon `addons/godotgo` plus its own tests
-- `games/orb-run` (3D), `games/leap` (2D platformer), `games/swarm` (2D shooter), `games/shift` (grid puzzle)
+- `games/orb-run` (3D), `games/leap` (2D platformer), `games/swarm` (2D shooter), `games/shift` (grid puzzle), `games/cascade` (collapse puzzle)
 - `templates/blank/` — what `tools/new_game.sh` copies
 
 Every game symlinks `addons/godotgo` to `framework/addons/godotgo`.
