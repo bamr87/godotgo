@@ -1,0 +1,58 @@
+[gd_scene load_steps=15 format=3 uid="uid://cabdw6i0yad73"]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/board_view.gd" id="2_board"]
+[ext_resource type="PackedScene" uid="uid://cxyk1gyarp51i" path="res://scenes/ui/hud.tscn" id="3_hud"]
+[ext_resource type="Script" path="res://addons/godotgo/ui/debug_overlay.gd" id="4_debug"]
+[ext_resource type="Script" path="res://addons/godotgo/util/object_pool.gd" id="5_pool"]
+[ext_resource type="PackedScene" uid="uid://di7mjjuvo4xl4" path="res://scenes/tile.tscn" id="6_tile"]
+[ext_resource type="Texture2D" path="res://assets/textures/tile_a.png" id="7_a"]
+[ext_resource type="Texture2D" path="res://assets/textures/tile_b.png" id="8_b"]
+[ext_resource type="Texture2D" path="res://assets/textures/tile_c.png" id="9_c"]
+[ext_resource type="Texture2D" path="res://assets/textures/tile_d.png" id="10_d"]
+[ext_resource type="Texture2D" path="res://assets/textures/tile_e.png" id="11_e"]
+[ext_resource type="AudioStream" path="res://assets/audio/pop.wav" id="12_pop"]
+[ext_resource type="AudioStream" path="res://assets/audio/fall.wav" id="13_fall"]
+[ext_resource type="AudioStream" path="res://assets/audio/clear.wav" id="14_clear"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_level")
+starting_level = 1
+target_ratio = 0.7
+board_margin_left = 250.0
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 960.0
+offset_bottom = 540.0
+color = Color(0.07, 0.08, 0.11, 1)
+
+[node name="Board" type="Node2D" parent="."]
+script = ExtResource("2_board")
+cell_size = 44
+tile_inset = 5
+pop_time = 0.14
+fall_time = 0.16
+colour_textures = Array[Texture2D]([ExtResource("7_a"), ExtResource("8_b"), ExtResource("9_c"), ExtResource("10_d"), ExtResource("11_e")])
+
+[node name="Tiles" type="Node2D" parent="Board"]
+
+[node name="TilePool" type="Node" parent="Board"]
+script = ExtResource("5_pool")
+scene = ExtResource("6_tile")
+initial_size = 108
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="PopSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12_pop")
+volume_db = -4.0
+
+[node name="FallSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("13_fall")
+volume_db = -8.0
+
+[node name="ClearSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("14_clear")
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("4_debug")

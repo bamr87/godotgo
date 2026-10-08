@@ -32,11 +32,11 @@ WITH_EXPORT_TEMPLATES=1 tools/docker.sh build && tools/docker.sh export orb-run
 | --- | --- | --- |
 | `Session` round lifecycle, one-shot `objective_reached`, throttled `time_changed`, terminal win/lose | every game | `framework/tests/unit/test_session.gd`, plus each game's `test_game.gd` |
 | Autoload wiring (`Game` extends `Session`) | every game | `games/orb-run/tests/unit/test_assets.gd` asserts the setting and that `Game` is a `Session` |
-| `SaveSystem` versioned slots, refusal of newer schemas, corrupt-file fallback | shift | `framework/tests/unit/test_save_system.gd` |
-| `ObjectPool` acquire/release, prewarm, caps, lifecycle callbacks, orphan cleanup | swarm | `framework/tests/unit/test_object_pool.gd` |
-| `StateMachine` enter/exit ordering, `time_in_state`, unknown-state refusal | swarm | `framework/tests/unit/test_state_machine.gd` |
-| `Rng` determinism, saved state, weighted picks | swarm | `framework/tests/unit/test_rng.gd` |
-| `TextGrid` parsing, padding, bounds, mutation, round-trip | leap, shift | `framework/tests/unit/test_text_grid.gd` |
+| `SaveSystem` versioned slots, refusal of newer schemas, corrupt-file fallback | shift, cascade | `framework/tests/unit/test_save_system.gd` |
+| `ObjectPool` acquire/release, prewarm, caps, lifecycle callbacks, orphan cleanup | swarm, cascade | `framework/tests/unit/test_object_pool.gd` |
+| `StateMachine` enter/exit ordering, `time_in_state`, unknown-state refusal | swarm, cascade | `framework/tests/unit/test_state_machine.gd` |
+| `Rng` determinism, saved state, weighted picks | swarm, cascade | `framework/tests/unit/test_rng.gd` |
+| `TextGrid` parsing, padding, bounds, mutation, round-trip | leap, shift, cascade | `framework/tests/unit/test_text_grid.gd` |
 | `MaterialMakerLoader`, including packed ORM channel splitting | orb-run | `framework/tests/unit/test_material_maker_loader.gd` against generated fixtures, and `games/orb-run/tests/unit/test_assets.gd` against a real 2048 px export |
 | `DebugOverlay` self-built UI, F3 toggle, session readout | template, leap | `framework/tests/unit/test_debug_overlay.gd` |
 | `GodotGoTest` helpers: physics frames, signal recording, floors, skips | every suite | every suite |
@@ -59,6 +59,12 @@ WITH_EXPORT_TEMPLATES=1 tools/docker.sh build && tools/docker.sh export orb-run
 | A pure-logic puzzle core with undo, corner-deadlock detection and no physics node anywhere | shift | `test_puzzle.gd`, and `test_level.gd` asserting the scene contains no `CollisionObject2D` |
 | Levels proven solvable by replaying a stored solution | shift | `test_level_builder.gd` plays a move string through each shipped level |
 | Saved per-level best move counts | shift | `test_progress_store.gd` |
+| Flood-filled groups, gravity and the column slide applied in one pass | cascade | `test_board.gd` against boards written as two lines of ASCII |
+| A pop animation that also locks input, so no pop can land on a cell the rules have already vacated | cascade | `test_board_view.gd`, `test_level.gd` refusing a second pop until the board settles |
+| Tile sprites reused across every board instead of reallocated | cascade | `test_board_view.gd` asserts the pool creates nothing extra after rendering all five levels |
+| The objective counter used as a threshold rather than an ending | cascade | `test_game.gd`: the target is announced once and the round plays on until the board jams |
+| Levels that are either an ASCII file or a seed, both rebuilding identically | cascade | `test_level_builder.gd`, and `test_level.gd` restarting a seeded board |
+| Saved per-level best score, biggest group and perfect clears | cascade | `test_score_store.gd` |
 
 ## Toolchain and integration
 

@@ -15,6 +15,7 @@ GodotGo is a **workspace for building Godot 4 games**, not a single game. It hol
 | `games/leap/` | 2D platformer, levels authored as ASCII text |
 | `games/swarm/` | 2D arena shooter: pooled bullets, state-machine enemies, seeded waves |
 | `games/shift/` | Grid puzzle: pure-logic core, undo, saved progress, no physics |
+| `games/cascade/` | Collapse puzzle: pooled tile views, a board state machine, levels from ASCII or a seed |
 | `templates/blank/` | What `tools/new_game.sh` copies to start a new game |
 
 Every game symlinks `addons/godotgo` to `framework/addons/godotgo`, so there is exactly one copy of the framework and a change to it is felt everywhere at once.
@@ -85,6 +86,7 @@ Each exists to prove a different part of the framework, and `docs/verification.m
 - **leap** (2D): `CharacterBody2D`, levels parsed from `levels/*.txt` with `TextGrid` and turned into merged collision runs by `LevelBuilder`, coins as optional score, spikes and pits spending a three-life budget, an `AnimatableBody2D` moving platform.
 - **swarm** (2D): `Arena` owns an `ObjectPool` of bullets whose `max_size` is a hard ceiling on shots in flight, `Enemy` behaviour is a framework `StateMachine`, and `WavePlanner` composes each wave from `Rng` reseeded per wave, so planning wave 7 directly gives the same answer as planning one through seven in order. Enemy kinds are `EnemyStats` resources.
 - **shift** (grid): `Puzzle` is a `RefCounted` holding every rule, including undo and corner-deadlock detection, with no physics node anywhere in the project; `LevelBuilder` reads four ASCII levels through `TextGrid`, `BoardView` draws them, and `ProgressStore` keeps per-level best move counts in a `SaveSystem` slot.
+- **cascade** (2D grid): `Board` is a `RefCounted` holding every rule, and `settle()` does gravity and the column slide in one pass so a tile is only ever told its final cell. `BoardView` draws it from an **uncapped** `ObjectPool` of tiles -- a cap would leave real tiles undrawn, which is the opposite of Swarm's bullets -- and sequences each pop with a `StateMachine` whose states double as the input lock. Levels are either ASCII through `TextGrid` or a seeded `Rng`, so a restart replays the same board either way. The session's objective counter is a *threshold*, not an ending: `objective_reached` fires as the target is crossed and the round runs on until the board jams.
 
 ## Conventions that matter here
 

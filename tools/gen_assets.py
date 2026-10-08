@@ -322,6 +322,27 @@ def _shift(base: str) -> None:
     write_wav(os.path.join(audio, "solved.wav"), sweep(0.45, 520, 1180, 5, 0.45))
 
 
+@project("games/cascade")
+def _cascade(base: str) -> None:
+    """Cascade's tiles differ in shape as well as hue, so a board stays readable
+    without relying on colour alone."""
+    tex = os.path.join(base, "assets/textures")
+    write_png(os.path.join(tex, "tile_a.png"), 16, 16, disc(16, (234, 96, 100, 255)))
+    write_png(os.path.join(tex, "tile_b.png"), 16, 16, rounded_box(16, (96, 158, 246, 255), 3))
+    write_png(os.path.join(tex, "tile_c.png"), 16, 16, triangle_up(16, (112, 206, 130, 255)))
+    write_png(os.path.join(tex, "tile_d.png"), 16, 16, ring(16, (246, 206, 92, 255), 3.0))
+    write_png(
+        os.path.join(tex, "tile_e.png"),
+        16,
+        16,
+        brick(16, (176, 118, 232, 255), (104, 66, 150, 255)),
+    )
+    audio = os.path.join(base, "assets/audio")
+    write_wav(os.path.join(audio, "pop.wav"), blip(0.08, 660, 34, gain=0.3))
+    write_wav(os.path.join(audio, "fall.wav"), noise_burst(0.14, 30, 5, 0.28))
+    write_wav(os.path.join(audio, "clear.wav"), sweep(0.5, 480, 1180, 5, 0.45))
+
+
 # --------------------------------------------------------------------------- #
 
 

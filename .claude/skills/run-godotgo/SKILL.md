@@ -1,9 +1,9 @@
 ---
 name: run-godotgo
-description: Build, run, drive and screenshot the GodotGo games (leap, orb-run, shift, swarm). Use when asked to start a game, play it, interact with it, see what it looks like, take a screenshot, or check that a change actually looks right on screen.
+description: Build, run, drive and screenshot the GodotGo games (leap, orb-run, shift, swarm, cascade). Use when asked to start a game, play it, interact with it, see what it looks like, take a screenshot, or check that a change actually looks right on screen.
 ---
 
-Four Godot 4 games live in this workspace. Drive any of them with `.claude/skills/run-godotgo/drive.sh`, which runs the real game inside the toolchain container under Xvfb with software Vulkan, sends scripted input, and writes PNG screenshots you can open. No GPU, no display, nothing installed but Docker.
+Five Godot 4 games live in this workspace. Drive any of them with `.claude/skills/run-godotgo/drive.sh`, which runs the real game inside the toolchain container under Xvfb with software Vulkan, sends scripted input, and writes PNG screenshots you can open. No GPU, no display, nothing installed but Docker.
 
 All paths are relative to the repository root.
 
@@ -31,7 +31,7 @@ Only needed for `GODOTGO_DRIVE_HOST=1` (below): the host engine, from `tools/ins
 .claude/skills/run-godotgo/drive.sh <game> [steps] [out-dir]
 ```
 
-`<game>` is `leap`, `orb-run`, `shift` or `swarm`. Screenshots default to `build/shots/` (gitignored). Steps default to `wait:60,shot:boot,state`.
+`<game>` is `leap`, `orb-run`, `shift`, `swarm` or `cascade`. Screenshots default to `build/shots/` (gitignored). Steps default to `wait:60,shot:boot,state`.
 
 Real runs from this session:
 
@@ -47,6 +47,9 @@ Real runs from this session:
 
 # Hold fire in Swarm
 .claude/skills/run-godotgo/drive.sh swarm 'state,press:fire:90,wait:30,shot:swarm-fight,state'
+
+# Pop the group under Cascade's cursor, then step right and take another
+.claude/skills/run-godotgo/drive.sh cascade 'tap:pop,wait:45,state,tap:move_right,tap:move_right,tap:move_right,tap:pop,wait:45,shot:cascade-play,state'
 ```
 
 ### The step grammar
@@ -71,6 +74,7 @@ Actions per game, from each `project.godot`:
 | orb-run | `move_forward move_back move_left move_right jump sprint restart` |
 | shift | `move_up move_down move_left move_right undo restart next_level` |
 | swarm | `move_up move_down move_left move_right fire restart` |
+| cascade | `move_up move_down move_left move_right pop restart next_level` |
 
 ### Reading the result
 
@@ -120,9 +124,9 @@ the game's `_ready` work has not run, so you get a black rectangle that looks ex
 - **Frames are not wall-clock.** Under Xvfb with no vsync the engine free-runs
 at roughly 150 fps, so counting *rendered* frames made `press:move_right:90` last 0.6 s rather than 1.5 s. The driver counts physics frames instead.
 - **`driver.gd` lives outside every Godot project**, so `res://` cannot address
-it. It is passed to `--script` as an absolute filesystem path, which Godot accepts. Do not move it into a project to "fix" this — it is shared by all four games, and this is why `drive.sh` builds `/workspace/...` paths for the container.
+it. It is passed to `--script` as an absolute filesystem path, which Godot accepts. Do not move it into a project to "fix" this — it is shared by all five games, and this is why `drive.sh` builds `/workspace/...` paths for the container.
 - **Screenshot size is the project's viewport, not the Xvfb screen.** Xvfb runs
-at 1280x720; leap, shift and swarm produce 960x540 because that is their configured viewport. Only orb-run is 1280x720.
+at 1280x720; leap, shift, swarm and cascade produce 960x540 because that is their configured viewport. Only orb-run is 1280x720.
 - **Swarm aims with the mouse.** `press:fire` fires along the default aim, so
 bullets appear but usually miss. The driver has no mouse verb; assert on bullets existing, not on kills.
 - **Shift refuses illegal moves, correctly.** `tap:move_down` into a wall
@@ -137,7 +141,7 @@ registers no move, so "3 taps, Moves 2" is the game working, not the driver fail
 | A dozen `ALSA lib conf.c` lines and `init_output_device ... ERR_CANT_OPEN` | The image has no sound card. Harmless — Godot falls back to a dummy driver — but `--audio-driver Dummy`, which `drive.sh` passes, silences it. |
 | `no such input action: X` | That action is not in this game's `project.godot`; see the table above. |
 | Screenshot is black | Photographed too early, or the scene really is broken. Raise `--settle`, and take a second shot later in the run to tell the two apart. |
-| `framework has no main scene; drive a game instead` | `framework` is a library project. Drive `leap`, `orb-run`, `shift` or `swarm`. |
+| `framework has no main scene; drive a game instead` | `framework` is a library project. Drive `leap`, `orb-run`, `shift`, `swarm` or `cascade`. |
 
 ## The harness
 

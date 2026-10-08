@@ -7,7 +7,7 @@ The repository root is not a Godot project. Each project is a directory with its
 ```
 framework/     the shared addon (addons/godotgo) plus its own tests
 vendor/        third-party addons fetched by an installer (gitignored)
-games/         orb-run, leap, swarm, shift
+games/         orb-run, leap, swarm, shift, cascade
 templates/     what tools/new_game.sh copies to start a new game
 tools/         project-aware scripts: verify, check, test, run, export, scaffold, Claude, Docker
 docker/        the container CI and contributors use
@@ -45,6 +45,7 @@ Each one exists to exercise a different part of the framework. [docs/verificatio
 | [leap](games/leap/) | 2D platformer | ASCII level maps parsed into merged collision runs, a life budget, a moving platform |
 | [swarm](games/swarm/) | 2D arena shooter | Pooled bullets with a hard ceiling, state-machine enemies, waves composed from a seed so a run replays exactly |
 | [shift](games/shift/) | Grid puzzle | A pure-logic core with undo, deadlock detection and no physics node anywhere, plus saved per-level best scores |
+| [cascade](games/cascade/) | Collapse puzzle | Tile sprites from an uncapped pool, a state machine that sequences each pop and locks input while it plays, and levels that are either ASCII or a seed |
 
 Every game is the same shape: rules live in a `Session` subclass registered as the autoload `Game`, scenes wire themselves to its signals, and the whole round is testable without a display.
 
