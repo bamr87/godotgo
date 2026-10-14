@@ -6,7 +6,7 @@ name: Claude Improve
 on:
   schedule:
     # 03:15 UTC on Mondays.
-    - cron: "53 0 * * 1"  # staggered AI cron (bamr87/bamr87#348); was 15 3 * * 1
+    - cron: "40 11 * * 1"  # staggered AI cron (bamr87/bamr87#348); was 15 3 * * 1
   workflow_dispatch:
     inputs:
       project:
