@@ -1,5 +1,11 @@
 # GodotGo
 
+> Godot 4 game workspace: one reusable framework, five sample games and tooling that treats every project the same.
+
+[![CI](https://github.com/bamr87/godotgo/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/godotgo/actions/workflows/ci.yml) [![License](https://img.shields.io/github/license/bamr87/godotgo)](LICENSE)
+
+## Overview
+
 A workspace for building Godot 4 games: one reusable framework, several complete sample games that exercise it, tooling that treats every game identically, and a Claude Code integration that can build, test and improve any of them.
 
 The repository root is not a Godot project. Each project is a directory with its own `project.godot`, and every game symlinks `addons/godotgo` to the single shared framework.
@@ -14,6 +20,15 @@ docker/        the container CI and contributors use
 docs/          framework guide, game authoring, AI development, verification matrix
 .claude/       Claude Code settings, edit hook, subagents, skills
 ```
+
+## Features
+
+- One shared framework addon (`addons/godotgo`) symlinked into every game
+- Five sample games that exercise it: orb-run, leap, swarm, shift and cascade
+- Project-aware tools to verify, test, smoke-run, export and scaffold any game the same way
+- A pinned Godot 4.7.2 shared by the host, the Docker image and CI
+- Generated placeholder sprites, sounds and meshes
+- Claude Code integration (settings, hooks, subagents, skills) to build and improve games
 
 ## Quick start
 
@@ -72,6 +87,10 @@ python3 tools/gen_assets.py leap     # one
 
 3D materials come from [Material Maker](docs/material-maker.md) through a headless Docker export.
 
+## Project structure
+
+See the tree at the top of this README; `docs/` holds the framework guide, game authoring, AI development and the verification matrix.
+
 ## AI-assisted development
 
 [docs/ai-development.md](docs/ai-development.md) covers the whole setup. The short version:
@@ -95,6 +114,19 @@ tools/godot_ai.sh edit leap        # open the editor with the bridge live
 
 It is optional and gitignored: nothing about a checkout, a test run or CI changes if you never install it.
 
+## Contributing
+
+Contributions are welcome via pull request. Use [Conventional Commits](https://www.conventionalcommits.org/) and keep the CI checks green. The fleet-wide workflow is described in the hub's [CONTRIBUTING.md](https://github.com/bamr87/bamr87/blob/main/CONTRIBUTING.md). AI agents should start with [CLAUDE.md](CLAUDE.md).
+
+## Changelog
+
+There is no CHANGELOG.md yet; changes are tracked in the [commit history](https://github.com/bamr87/godotgo/commits/main).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+---
+
+<!-- bamr87-portfolio-footer -->
+Part of the [bamr87 portfolio](https://github.com/bamr87) — browse every project on [Amr's GitHub profile](https://github.com/bamr87).
