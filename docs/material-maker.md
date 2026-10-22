@@ -1,5 +1,7 @@
 # Material Maker workflow
 
+> How to install Material Maker, author a material and export it headlessly through Docker into a game's `materials/` folder for Godot 4.
+
 Material Maker is a Godot-based procedural texture and material authoring tool. This project expects Godot 4 exports dropped into `games/<slug>/materials/<name>/`.
 
 ## Install

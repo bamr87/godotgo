@@ -14,6 +14,8 @@
 			"Bash(tools/godot.sh --headless*)",
 			"Bash(tools/docker.sh*)",
 			"Bash(python3 tools/gen_assets.py*)",
+			"Bash(python3 tools/gen_framework_api.py*)",
+			"Bash(python3 tools/docs_index.py*)",
 			"Bash(.venv/bin/gdlint*)",
 			"Bash(.venv/bin/gdformat*)",
 			"Bash(gdlint*)",

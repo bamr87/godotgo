@@ -1,6 +1,8 @@
 # GodotGo Copilot instructions
 
-GodotGo is a workspace for building Godot 4 games: a reusable framework, several sample games, project-aware tooling and a Claude Code integration. `CLAUDE.md` at the repo root is the authoritative agent guide; keep this file consistent with it.
+> The short form of the workspace rules for GitHub Copilot; `AGENTS.md` at the repo root is the canonical agent guide, and this file must stay consistent with it.
+
+GodotGo is a workspace for building Godot 4 games: a reusable framework, several sample games, project-aware tooling and a Claude Code integration.
 
 ## Layout
 

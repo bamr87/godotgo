@@ -1,6 +1,8 @@
 # The GodotGo framework
 
-`framework/addons/godotgo/` is a normal Godot 4 addon. Every game in this workspace symlinks it as `addons/godotgo`, so there is one copy and one place to change. This page is the API reference and the reasoning behind each piece.
+> Why each piece of the shared `addons/godotgo` framework exists, how a game uses it, and the behaviours that are easy to trip over; the member-by-member API is generated separately.
+
+`framework/addons/godotgo/` is a normal Godot 4 addon. Every game in this workspace symlinks it as `addons/godotgo`, so there is one copy and one place to change. This page is the reasoning behind each piece; every class, signal, property and method, with its doc comment, is in the generated [framework API reference](reference/framework-api.md) (`python3 tools/gen_framework_api.py` rebuilds it, and `tools/verify.sh` warns when it is stale).
 
 Run its own suite with `tools/verify.sh framework`.
 
@@ -21,19 +23,7 @@ func collect_orb() -> bool:
 	return true
 ```
 
-| Member | Meaning |
-| --- | --- |
-| `State` | `READY`, `PLAYING`, `PAUSED`, `WON`, `LOST` |
-| `start(goal, limit)` | Begins a round. `goal` 0 means no counted objective, `limit` 0 means no countdown |
-| `add_score(n)` / `advance(n)` | Score and objective progress. Both return false unless a round is running |
-| `objective_complete()` | `progress >= goal`, with a non-zero goal |
-| `tick(delta)` | Advances the clock. `_process` calls it; tests call it directly to step time exactly |
-| `pause()` / `resume()` | Suspends the clock without ending the round |
-| `win()` / `lose(reason)` | Terminal. Both are ignored once the round is over |
-| `summary()` | Score, progress, goal, elapsed, time left, state |
-| `reset()` | Back to `READY` with every counter cleared |
-
-Signals: `state_changed`, `score_changed`, `progress_changed`, `time_changed`, `objective_reached`, `won`, `lost`.
+A round goes from `READY` to `PLAYING`, can pause and resume, and ends `WON` or `LOST`. `start(goal, limit)` begins one (0 means no counted objective, or no countdown), `add_score` and `advance` only count while it is running, and `win`/`lose` are terminal. Tests call `tick(delta)` directly to step the clock exactly. The full member list is in the [reference](reference/framework-api.md#session).
 
 Three details worth knowing:
 
@@ -52,7 +42,7 @@ SaveSystem.store("progress", {"level": 3, "best_moves": 42})
 var data := SaveSystem.fetch("progress", {"level": 1})
 ```
 
-`store`, `fetch`, `has_slot`, `erase`, `slots()`, `sanitize`, `path_for`. A slot written by a newer `VERSION` is refused and the fallback returned, rather than half-read; corrupt JSON does the same without printing an engine error. Slot names are sanitised to `[a-z0-9_-]`, so a name from user input cannot escape the directory.
+A slot written by a newer `VERSION` is refused and the fallback returned, rather than half-read; corrupt JSON does the same without printing an engine error. Slot names are sanitised to `[a-z0-9_-]`, so a name from user input cannot escape the directory.
 
 ## ObjectPool
 
@@ -82,19 +72,19 @@ fsm.start(&"idle")
 fsm.update(delta)
 ```
 
-`current`, `previous`, `time_in_state`, `has_state`, `states()`, `transition_to`, signal `transitioned`. Transitioning to the current state is a no-op rather than a re-entry.
+Transitioning to the current state is a no-op rather than a re-entry, and `states()` sorts on the names' text, because a `StringName` array otherwise sorts by hash.
 
 ## Rng
 
 `util/rng.gd`. Seeded randomness, because "the same seed produces the same wave" is the only way to test a spawner.
 
-`Rng.new(seed)`, `reseed`, `get_state`/`set_state` (save and resume a sequence mid-run), `randi`, `randi_range`, `randf`, `randf_range`, `chance`, `pick`, `shuffled` (returns a new array, leaves the input alone), `weighted_pick`, `direction`, `point_in_rect`.
+`get_state`/`set_state` save and resume a sequence mid-run, and `reseed` restarts one, which is how Swarm plans any wave directly from its own seed. `shuffled` returns a new array and leaves the input alone.
 
 ## TextGrid
 
 `util/text_grid.gd`. ASCII level maps, so levels are diffable, editable anywhere and assertable in tests without opening a scene.
 
-`TextGrid.parse(text)`, `TextGrid.from_file(path)`, `at`, `cell`, `set_at`, `find_first`, `find_all`, `find_any`, `count`, `in_bounds`, `clone`, `to_text`. Rows are padded to a common width, blank leading and trailing lines are dropped, and out-of-bounds reads return `TextGrid.EMPTY` rather than erroring, so a builder can look one cell past the edge without guarding every call.
+Rows are padded to a common width, blank leading and trailing lines are dropped, and out-of-bounds reads return `TextGrid.EMPTY` rather than erroring, so a builder can look one cell past the edge without guarding every call.
 
 ## MaterialMakerLoader
 
@@ -108,17 +98,11 @@ fsm.update(delta)
 
 `testing/test_runner.gd` extends `SceneTree` and is launched with `--script`. It waits one frame so the tree is live, discovers `tests/unit/**/test_*.gd`, runs every `test_*` method of each `GodotGoTest` subclass with `before_each`/`after_each`, drains the deletion queue, prints a summary and exits non-zero on any failure.
 
-`testing/test_case.gd` (`GodotGoTest`) provides:
+`testing/test_case.gd` (`GodotGoTest`) is the base class: the `assert_*` family, scene and node helpers, physics floors, signal recording and `skip`; its [reference entry](reference/framework-api.md#godotgotest) lists them all. Three behaviours shape how tests are written:
 
-| Helper | Use |
-| --- | --- |
-| `assert_eq`, `assert_ne`, `assert_true`, `assert_false`, `assert_null`, `assert_not_null`, `assert_almost_eq`, `assert_is`, `fail` | Assertions |
-| `add_scene(packed)`, `add_node(node)` | Put something in the tree |
-| `free_node(node)` | Queue-free and wait; tolerates an already-freed node |
-| `physics_frames(n)` | Await `n` physics frames. Resumes inside the frame, so an `Input.action_press` right after counts as just-pressed |
-| `record(signal)` | An array that fills with emitted arguments and disconnects after the test |
-| `add_floor_2d()`, `add_floor_3d()` | A static floor whose top surface is at 0 |
-| `skip(reason)`, `is_headless()` | Opt out of what the dummy DisplayServer cannot do |
+- `physics_frames(n)` resumes **inside** the physics frame, so an `Input.action_press` right after it counts as just-pressed.
+- `record(signal)` returns an array that fills with emitted arguments and disconnects itself after the test, so nothing leaks into the next one.
+- Anything the dummy DisplayServer cannot do, such as mouse capture, must `skip(reason)` when `is_headless()`.
 
 Tests may `await`. Autoloads are live, so reset `Game` in `before_each` and `after_each`.
 

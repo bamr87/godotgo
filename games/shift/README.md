@@ -1,6 +1,6 @@
 # Shift
 
-Grid puzzle: push every crate onto a target, with undo and saved progress.
+> Grid puzzle: push every crate onto a target, with undo and saved progress.
 
 ```bash
 tools/run.sh shift          # play

@@ -1,5 +1,7 @@
 # Verification: what proves the framework works
 
+> The matrix that maps every framework, game and toolchain feature to the test that proves it, plus how to run everything and the known harmless noise.
+
 The sample games are not decoration. Each one puts a different part of the framework on the critical path of something playable, so a green run is evidence that the framework, the toolchain and the integrations actually work rather than merely compile.
 
 Everything below runs against the Godot release pinned in `tools/lib.sh` (currently 4.7.2). `tools/install_godot.sh` puts that exact build in `.godot-bin/`, the image build receives the same version, and the CI action reads it from the same variable, so "it passes on my machine" and "it passes in CI" mean the same engine.
