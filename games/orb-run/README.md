@@ -1,6 +1,6 @@
 # Orb Run
 
-3D first-person: collect the five orbs scattered across the arena and its platforms, then reach the exit portal before the 90-second timer runs out.
+> 3D first-person: collect the five orbs scattered across the arena and its platforms, then reach the exit portal before the 90-second timer runs out.
 
 ```bash
 tools/run.sh orb-run        # play

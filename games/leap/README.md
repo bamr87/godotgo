@@ -1,6 +1,8 @@
 # Leap
 
-2D platformer: run and jump through an ASCII-authored level, collect coins for score, and reach the flag before the timer runs out. Spikes and pits cost one of three lives.
+> 2D platformer: run and jump through an ASCII-authored level, collect coins for score, and reach the flag before the timer runs out.
+
+Spikes and pits cost one of three lives.
 
 ```bash
 tools/run.sh leap        # play

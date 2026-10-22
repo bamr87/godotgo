@@ -1,6 +1,6 @@
 # Cascade
 
-Collapse puzzle: pop colour groups, watch the board fall and the columns close up.
+> Collapse puzzle: pop colour groups, watch the board fall and the columns close up.
 
 ```bash
 tools/run.sh cascade          # play
