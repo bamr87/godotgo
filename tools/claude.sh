@@ -90,13 +90,13 @@ Rules:
 - Never invent a uid:// value. Generate one with
   tools/godot.sh --headless --path <project> --script res://addons/godotgo/tools/new_uid.gd
 - Verify with tools/check.sh, tools/test.sh and tools/smoke.sh (or tools/verify.sh).
-  Do not claim success until they pass. CLAUDE.md has the full detail.
+  Do not claim success until they pass. AGENTS.md has the full detail.
 BRIEF
 }
 
 # Tools Claude may use. Bash is restricted to this workspace's own scripts so an
 # unattended run cannot reach for arbitrary commands.
-ALLOWED_WRITE='Read,Glob,Grep,Edit,Write,MultiEdit,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/smoke.sh*),Bash(tools/verify.sh*),Bash(tools/godot.sh --headless*),Bash(tools/new_game.sh*),Bash(python3 tools/gen_assets.py*),Bash(git status*),Bash(git diff*)'
+ALLOWED_WRITE='Read,Glob,Grep,Edit,Write,MultiEdit,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/smoke.sh*),Bash(tools/verify.sh*),Bash(tools/godot.sh --headless*),Bash(tools/new_game.sh*),Bash(python3 tools/gen_assets.py*),Bash(python3 tools/gen_framework_api.py*),Bash(git status*),Bash(git diff*)'
 ALLOWED_READ='Read,Glob,Grep,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/smoke.sh*),Bash(tools/verify.sh*),Bash(git status*),Bash(git diff*),Bash(git log*)'
 
 run_claude() {
