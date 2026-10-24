@@ -24,10 +24,12 @@ New to the workspace? Read [authoring-games.md](authoring-games.md) to build a g
 | --- | --- |
 | [`docs/ai-development.md`](ai-development.md) | How Claude Code is wired into this workspace: OAuth setup, `tools/claude.sh`, the MCP servers and the live-editor bridge, the Docker toolchain and the GitHub workflows. |
 | [`docs/authoring-games.md`](authoring-games.md) | How to start, structure, illustrate, level-design and verify a new game on the shared framework, with the sample games as worked examples. |
+| [`docs/constitution.md`](constitution.md) | The rules every change to this repo must satisfy, whoever makes it — a human or an AI agent. Agents read this before [AGENTS.md](../AGENTS.md) conventions, the [PRD](../PRD.md), or the [feature catalog](../features/features.yml). Ratified… |
 | [`docs/framework.md`](framework.md) | Why each piece of the shared `addons/godotgo` framework exists, how a game uses it, and the behaviours that are easy to trip over; the member-by-member API is generated separately. |
 | [`docs/material-maker.md`](material-maker.md) | How to install Material Maker, author a material and export it headlessly through Docker into a game's `materials/` folder for Godot 4. |
 | [`docs/verification.md`](verification.md) | The matrix that maps every framework, game and toolchain feature to the test that proves it, plus how to run everything and the known harmless noise. |
 | [`docs/adr/`](adr/README.md) | The index and format of godotgo's architecture decisions — the choices that are hard to reverse, recorded in the PR that makes them. |
+| [`docs/amendments/`](amendments/README.md) | The append-only log of changes to [the constitution](constitution.md). |
 
 ### `docs/reference/`
 
