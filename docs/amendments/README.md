@@ -1,6 +1,8 @@
 <!-- kit: governance v0.1.0 -->
 # Amendments — godotgo
 
+> The append-only log of numbered amendments to godotgo's constitution, with each record's status and what it affects.
+
 The append-only log of changes to [the constitution](../constitution.md). Process: constitution § 8.
 
 - File name: `NNNN-kebab-slug.md`, next free number, never reused. Copy [0000-template.md](0000-template.md).

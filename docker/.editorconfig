@@ -1,0 +1,6 @@
+# The shell scripts here are tab-indented; keep them that way instead of the fleet default
+# (2 spaces) so edits do not mix indentation. The root .editorconfig stays the hub copy (UPS-REPO-17).
+
+[*.sh]
+indent_style = tab
+indent_size = 4

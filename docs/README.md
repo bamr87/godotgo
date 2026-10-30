@@ -16,6 +16,7 @@ New to the workspace? Read [authoring-games.md](authoring-games.md) to build a g
 | --- | --- |
 | [`AGENTS.md`](../AGENTS.md) | A workspace for building Godot 4 games: one shared framework addon, five sample games that exercise it, tooling that treats every project the same, and a Claude Code integration that can build, test and improve any of them. |
 | [`CHANGELOG.md`](../CHANGELOG.md) | Release history: the notable changes in each version, newest first. |
+| [`SECURITY.md`](../SECURITY.md) | Supported versions and how to report a vulnerability privately. |
 | [`PRD.md`](../PRD.md) | The product requirements for GodotGo: problem, users, goals and non-goals, features, requirements and proposed success measures. |
 
 ### `docs/`
@@ -29,7 +30,7 @@ New to the workspace? Read [authoring-games.md](authoring-games.md) to build a g
 | [`docs/material-maker.md`](material-maker.md) | How to install Material Maker, author a material and export it headlessly through Docker into a game's `materials/` folder for Godot 4. |
 | [`docs/verification.md`](verification.md) | The matrix that maps every framework, game and toolchain feature to the test that proves it, plus how to run everything and the known harmless noise. |
 | [`docs/adr/`](adr/README.md) | The index and format of godotgo's architecture decisions — the choices that are hard to reverse, recorded in the PR that makes them. |
-| [`docs/amendments/`](amendments/README.md) | The append-only log of changes to [the constitution](constitution.md). |
+| [`docs/amendments/`](amendments/README.md) | The append-only log of numbered amendments to godotgo's constitution, with each record's status and what it affects. |
 
 ### `docs/reference/`
 
