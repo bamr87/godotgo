@@ -71,3 +71,12 @@ features:
     surface: infra
     link: ".claude/settings.json"
     docs: "README.md"
+  - id: GODOTGO-007
+    title: "PerfectPixel Studio sprite-sheet import"
+    description: "Planned: import AI-generated 8-direction character sprite sheets from PerfectPixel Studio (github.com/gykim80/perfectpixel-studio, MIT) via its manifest.json / Aseprite JSON export into SpriteFrames; external optional tool, not vendored, kept out of gen_assets.py"
+    implemented: false
+    status: planned
+    prd: [FR4]
+    surface: infra
+    link: "framework/addons"
+    docs: "PRD.md"
