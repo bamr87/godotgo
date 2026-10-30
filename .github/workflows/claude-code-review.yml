@@ -11,8 +11,43 @@ on:
       - "docker/**"
 
 jobs:
+  # The review needs a Claude credential, and this is the only input the action
+  # below is given. Without it claude-code-action exits non-zero with an empty
+  # `claude_code_oauth_token`, which is how every Claude Code Review run on this
+  # repo failed until the secret was added on 2026-10-26 — 13 red runs, each
+  # after installing Godot, for a missing credential rather than anything in the
+  # pull request. Ask first, so an absent secret is a skip, not a failure (and
+  # not a wasted Godot install either).
+  preflight:
+    name: Claude credential present?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      armed: ${{ steps.probe.outputs.armed }}
+    steps:
+      - id: probe
+        env:
+          # A comparison, never the value: this prints true or false.
+          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          echo "armed=$ARMED" >> "$GITHUB_OUTPUT"
+          if [ "$ARMED" = "true" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is present — running the review."
+            exit 0
+          fi
+          echo "::warning title=Review skipped::No CLAUDE_CODE_OAUTH_TOKEN on $GITHUB_REPOSITORY, so Claude cannot review this pull request. Skipping instead of failing."
+          {
+            echo "### Claude Code Review skipped — no credential"
+            echo
+            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription), or switch this workflow to \`anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}\` to bill the API instead."
+            echo
+            echo "The fleet propagates this secret weekly from the hub (\`token-rotation.yml\`, bamr87/bamr87 \`docs/TOKEN-ROTATION.md\`)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   review:
-    if: github.event.pull_request.draft == false
+    needs: preflight
+    if: github.event.pull_request.draft == false && needs.preflight.outputs.armed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
