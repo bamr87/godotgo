@@ -10,17 +10,6 @@ A workspace for building Godot 4 games: one reusable framework, several complete
 
 The repository root is not a Godot project. Each project is a directory with its own `project.godot`, and every game symlinks `addons/godotgo` to the single shared framework.
 
-```
-framework/     the shared addon (addons/godotgo) plus its own tests
-vendor/        third-party addons fetched by an installer (gitignored)
-games/         orb-run, leap, swarm, shift, cascade
-templates/     what tools/new_game.sh copies to start a new game
-tools/         project-aware scripts: verify, check, test, run, export, scaffold, Claude, Docker
-docker/        the container CI and contributors use
-docs/          framework guide, game authoring, AI development, verification matrix
-.claude/       Claude Code settings, edit hook, subagents, skills
-```
-
 ## Features
 
 - One shared framework addon (`addons/godotgo`) symlinked into every game
@@ -74,7 +63,7 @@ Every game is the same shape: rules live in a `Session` subclass registered as t
 - **DebugOverlay** is an F3 diagnostics panel that builds its own UI.
 - **GodotGoTest** and a `SceneTree` test runner give headless tests with physics frames, signal recording and scene helpers, with no third-party dependency.
 
-[docs/framework.md](docs/framework.md) is the API reference; [docs/authoring-games.md](docs/authoring-games.md) walks through building a game on it.
+[docs/framework.md](docs/framework.md) explains each piece, [docs/reference/framework-api.md](docs/reference/framework-api.md) is the API reference generated from the scripts' doc comments, and [docs/authoring-games.md](docs/authoring-games.md) walks through building a game on it.
 
 ## Placeholder assets are generated
 
@@ -86,10 +75,6 @@ python3 tools/gen_assets.py leap     # one
 ```
 
 3D materials come from [Material Maker](docs/material-maker.md) through a headless Docker export.
-
-## Project structure
-
-See the tree at the top of this README; `docs/` holds the framework guide, game authoring, AI development and the verification matrix.
 
 ## AI-assisted development
 
@@ -114,9 +99,40 @@ tools/godot_ai.sh edit leap        # open the editor with the bridge live
 
 It is optional and gitignored: nothing about a checkout, a test run or CI changes if you never install it.
 
+## Documentation
+
+[docs/README.md](docs/README.md) indexes every document in the repository, one line each.
+
+## Project structure
+
+```
+framework/     the shared addon (addons/godotgo) plus its own tests
+vendor/        third-party addons fetched by an installer (gitignored)
+games/         orb-run, leap, swarm, shift, cascade
+templates/     what tools/new_game.sh copies to start a new game
+tools/         project-aware scripts: verify, check, test, run, export, scaffold, Claude, Docker
+docker/        the container CI and contributors use
+docs/          framework guide, generated API reference, game authoring, AI development, verification matrix
+.claude/       Claude Code settings, edit hook, subagents, skills
+```
+
+[AGENTS.md](AGENTS.md) § Layout describes each directory.
+
+## Development
+
+```bash
+tools/verify.sh [project]            # the gate: version pins, check, test, smoke
+tools/check.sh [project]             # load every script, scene and resource; gdlint + gdformat --check
+tools/test.sh [project] [filter]     # headless unit tests
+tools/export.sh <project> [preset]   # release build (or tools/docker.sh export <project>)
+python3 tools/gen_framework_api.py   # regenerate docs/reference/framework-api.md
+```
+
+[AGENTS.md](AGENTS.md) is the canonical guide to working here: every command, the engine pin, the scene and UID rules, and the conventions CI enforces.
+
 ## Contributing
 
-Contributions are welcome via pull request. Use [Conventional Commits](https://www.conventionalcommits.org/) and keep the CI checks green. The fleet-wide workflow is described in the hub's [CONTRIBUTING.md](https://github.com/bamr87/bamr87/blob/main/CONTRIBUTING.md). AI agents should start with [CLAUDE.md](CLAUDE.md).
+Contributions are welcome via pull request. Use [Conventional Commits](https://www.conventionalcommits.org/) and keep the CI checks green. The fleet-wide workflow is described in the hub's [CONTRIBUTING.md](https://github.com/bamr87/bamr87/blob/main/CONTRIBUTING.md). AI agents and contributors should start with [AGENTS.md](AGENTS.md).
 
 ## Changelog
 

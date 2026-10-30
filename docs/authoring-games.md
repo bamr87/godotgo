@@ -1,5 +1,7 @@
 # Authoring a game
 
+> How to start, structure, illustrate, level-design and verify a new game on the shared framework, with the sample games as worked examples.
+
 Every game in this workspace has the same shape, and the shape is what makes the tooling, the tests and the AI integration work the same way for all of them.
 
 ## Before anything
@@ -79,6 +81,16 @@ Scene files are text and can be written directly. Three things must be right:
 3. Nodes in tree order, with `parent="."` for children of the root.
 
 Then `tools/check.sh <slug>`, which loads every scene and catches missing resources and wrong counts.
+
+## The sample games as worked examples
+
+Each sample puts a different part of the framework on the critical path; [verification.md](verification.md) maps every feature to the test that proves it.
+
+- **orb-run** (3D): a `CharacterBody3D` with coyote time and jump buffering, `Area3D` pickups and an exit gated on the objective, `GPUParticles3D`, real Material Maker PBR materials, generated audio and an OBJ mesh.
+- **leap** (2D): a `CharacterBody2D`, levels parsed from `levels/*.txt` with `TextGrid` and turned into merged collision runs by `LevelBuilder`, coins as optional score, spikes and pits spending a three-life budget, and an `AnimatableBody2D` moving platform.
+- **swarm** (2D): `Arena` owns an `ObjectPool` of bullets whose `max_size` is a hard ceiling on shots in flight, `Enemy` behaviour is a framework `StateMachine`, and `WavePlanner` composes each wave from an `Rng` reseeded per wave, so planning wave 7 directly gives the same answer as planning one through seven in order. Enemy kinds are `EnemyStats` resources.
+- **shift** (grid): `Puzzle` is a `RefCounted` holding every rule, including undo and corner-deadlock detection, with no physics node anywhere in the project; `LevelBuilder` reads four ASCII levels through `TextGrid`, `BoardView` draws them, and `ProgressStore` keeps per-level best move counts in a `SaveSystem` slot.
+- **cascade** (2D grid): `Board` is a `RefCounted` holding every rule, and `settle()` does gravity and the column slide in one pass so a tile is only ever told its final cell. `BoardView` draws it from an **uncapped** `ObjectPool` of tiles — a cap would leave real tiles undrawn, the opposite of Swarm's bullets — and sequences each pop with a `StateMachine` whose states double as the input lock. Levels are either ASCII through `TextGrid` or a seeded `Rng`, so a restart replays the same board either way. The session's objective counter is a *threshold*, not an ending: `objective_reached` fires as the target is crossed and the round runs on until the board jams.
 
 ## Physics layers
 

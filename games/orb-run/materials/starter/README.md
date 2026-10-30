@@ -1,5 +1,7 @@
 # Starter PBR
 
+> The starter Material Maker PBR graph, the files its export writes, and how to regenerate them.
+
 `starter_pbr.ptex` is the Material Maker graph (a copy of Material Maker's `rock` example). Re-export it with:
 
 ```bash

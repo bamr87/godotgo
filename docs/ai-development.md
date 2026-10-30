@@ -1,6 +1,8 @@
 # AI-assisted development
 
-This workspace is set up so Claude Code can build, test, review and improve any project in it, locally and in GitHub Actions, with the framework's own verification as the gate. `CLAUDE.md` at the repo root is the agent-facing guide; this page is the setup.
+> How Claude Code is wired into this workspace: OAuth setup, `tools/claude.sh`, the MCP servers and the live-editor bridge, the Docker toolchain and the GitHub workflows.
+
+This workspace is set up so Claude Code can build, test, review and improve any project in it, locally and in GitHub Actions, with the framework's own verification as the gate. `AGENTS.md` at the repo root is the agent-facing guide (Claude Code reads it through the `CLAUDE.md` import); this page is the setup.
 
 ## Authenticating with a Claude Code OAuth token
 
@@ -43,17 +45,20 @@ The `review` subcommand is the cheapest way to see the integration work. It foun
 
 | Path | Purpose |
 | --- | --- |
-| `CLAUDE.md` | Conventions, architecture and commands; read automatically |
+| `AGENTS.md` (imported by `CLAUDE.md`) | Commands, conventions and invariants; read automatically |
 | `.claude/settings.json` | Pre-approved commands, denied paths, the edit hook. Its `enableAllProjectMcpServers` does **not** auto-approve the servers in `.mcp.json`: a repository cannot approve its own, so Claude Code ignores that setting when it is committed to the project and asks on first run instead |
 | `.claude/hooks/gd-check.sh` | Loads every edited `.gd`/`.tscn`/`.tres` through the owning project's Godot and blocks on failure |
 | `.claude/agents/godot-qa.md` | Runs the full verification pass and reports verbatim |
 | `.claude/agents/gdscript-reviewer.md` | Read-only review of GDScript and scenes |
+| `.claude/agents/verifier.md` | Acceptance testing through the running app, with an evidence bundle |
 | `.claude/skills/verify` | The check, test and smoke commands |
 | `.claude/skills/new-game` | Scaffolding a game |
 | `.claude/skills/new-scene` | Hand-authoring `.tscn`/`.tres` safely |
 | `.claude/skills/framework` | The framework API |
 | `.claude/skills/mm-export` | Material Maker exports |
 | `.claude/skills/godot-ai` | The live-editor MCP bridge |
+| `.claude/skills/run-godotgo` | Running, driving and screenshotting a game |
+| `.claude/skills/verify-feature` | Proving a user-visible change with screenshots and an evidence bundle |
 | `.mcp.json` | Godot MCP servers |
 
 Per-machine settings belong in `.claude/settings.local.json`, which is gitignored. It is usually empty: the engine comes from `.godot-bin/`, put there by `tools/install_godot.sh` at the version pinned in `tools/lib.sh`. Override it only to point at an engine somewhere else:

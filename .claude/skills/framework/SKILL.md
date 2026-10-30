@@ -6,6 +6,8 @@ allowed-tools: Read Glob Grep
 
 The framework lives in `framework/addons/godotgo/` and is symlinked into every game as `addons/godotgo`. Every class is a global `class_name`, so no preload is needed.
 
+This is a summary. Every member's exact signature and doc comment is in `docs/reference/framework-api.md`, generated from the scripts by `python3 tools/gen_framework_api.py`; read it when you need one this page leaves out. The reasoning behind each piece is `docs/framework.md`.
+
 ## Session (`core/session.gd`)
 
 The round lifecycle. Each game registers a subclass as the autoload `Game`.

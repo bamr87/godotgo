@@ -1,6 +1,6 @@
 # Swarm
 
-Top-down arena shooter: survive waves of drones with a pooled bullet system and deterministic spawns.
+> Top-down arena shooter: survive waves of drones with a pooled bullet system and deterministic spawns.
 
 Fly with **WASD**, aim with the mouse and hold the left button (or **Space**) to fire. Clear five waves to hold the arena; three hits and the hull is gone. **R** restarts.
 

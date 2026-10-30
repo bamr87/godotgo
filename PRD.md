@@ -1,8 +1,8 @@
 # PRD — GodotGo
 
-> Product requirements for [`bamr87/godotgo`](https://github.com/bamr87/godotgo).
-> Derived from the README, agent docs, config and code in this repo. Anything not
-> stated in those sources is marked **TBD**; success metrics are proposals.
+> The product requirements for GodotGo: problem, users, goals and non-goals, features, requirements and proposed success measures.
+
+Derived from the README, agent docs, config and code in [`bamr87/godotgo`](https://github.com/bamr87/godotgo). Anything not stated in those sources is marked **TBD**; success metrics are proposals.
 
 ## 1. Overview / problem
 
@@ -88,4 +88,4 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 
 ## 8. Links
 
-- [README.md](README.md) · [AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/framework.md](docs/framework.md) · [docs/verification.md](docs/verification.md)
+- [README.md](README.md) · [AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md) · [Backlog: GitHub Issues](https://github.com/bamr87/godotgo/issues) · [CHANGELOG.md](CHANGELOG.md) · [docs/framework.md](docs/framework.md) · [docs/verification.md](docs/verification.md)

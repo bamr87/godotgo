@@ -1,5 +1,7 @@
 # Metal
 
+> The Material Maker `metal_pattern` graph that textures orb-run's platforms, and how to re-export it.
+
 `metal.ptex` is Material Maker's `metal_pattern` example. It textures the platforms in `scenes/main.tscn`.
 
 Re-export (PNGs only; the `.tres` is kept):

@@ -1,6 +1,6 @@
 # __GAME_TITLE__
 
-__GAME_DESC__
+> __GAME_DESC__
 
 Created from `templates/blank` by `tools/new_game.sh`.
 
