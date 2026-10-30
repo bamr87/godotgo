@@ -48,6 +48,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | [GODOTGO-004](features/features.yml) | Generated placeholder sprites/sounds/meshes | shipped | [`tools/gen_assets.py`](tools/gen_assets.py) · [`README.md`](README.md) | TBD |
 | [GODOTGO-005](features/features.yml) | Docker image and CI verifying every project in parallel | shipped | [`docker/Dockerfile`](docker/Dockerfile) · [`README.md`](README.md) | TBD |
 | [GODOTGO-006](features/features.yml) | Claude Code settings | shipped | [`.claude/settings.json`](.claude/settings.json) · [`README.md`](README.md) | TBD |
+| [GODOTGO-007](features/features.yml) | PerfectPixel Studio sprite-sheet import | planned | [`framework/addons`](framework/addons) · [`PRD.md`](PRD.md) | FR4 |
 
 **Requirement → feature trace**
 
@@ -56,6 +57,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | TBD | GODOTGO-001, GODOTGO-002, GODOTGO-004, GODOTGO-005, GODOTGO-006 |
 | FR2 | GODOTGO-003 |
 | FR1 | GODOTGO-003 |
+| FR4 | GODOTGO-007 |
 <!-- features:end -->
 
 ## 5. Requirements
@@ -65,6 +67,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 - FR1: `tools/verify.sh` checks engine-version pins, tests and smoke-boots every project
 - FR2: `tools/new_game.sh` returns only verified scaffolds
 - FR3: CI fails if regenerated assets differ from committed ones
+- FR4 (planned): Games can import AI-generated character sprite sheets (8 directions, multi-state animations) produced by [PerfectPixel Studio](https://github.com/gykim80/perfectpixel-studio) as `SpriteFrames` without hand editing
 
 **Non-functional**
 
@@ -81,6 +84,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 ## 7. Roadmap / open questions
 
 - Export/distribution targets: TBD
+- **Planned — integrate PerfectPixel Studio ([GODOTGO-007](features/features.yml), FR4).** [gykim80/perfectpixel-studio](https://github.com/gykim80/perfectpixel-studio) (MIT; Wails + Go + React desktop app) generates 8-direction character sprite sheets with 100+ motion presets from a text prompt and exports a sprite sheet, `manifest.json` and Aseprite-compatible JSON. Approach: treat it as an *external, optional asset-pipeline tool*, not a vendored dependency — add a framework-side importer (`EditorImportPlugin` or a `tools/` script) that turns its `manifest.json`/Aseprite JSON into `SpriteFrames` resources, with unit tests on a small checked-in fixture. License: MIT is compatible with this repo's license; keep its copyright notice if any code is copied. Open questions: generated art needs paid AI provider keys (Gemini/OpenRouter/fal.ai/BytePlus) and is non-deterministic, so it must stay outside `tools/gen_assets.py` and its byte-identical CI check (FR3); provider terms for generated images need review before shipping such art in a game.
 
 ## 8. Links
 
