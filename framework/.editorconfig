@@ -1,0 +1,6 @@
+# Godot sources keep tabs (AGENTS.md conventions, gdformat). The root .editorconfig is the
+# byte-identical fleet copy (UPS-REPO-17); this file only adds the Godot file types it does not cover.
+
+[*.{gd,tscn,tres,godot,cfg}]
+indent_style = tab
+indent_size = 4
