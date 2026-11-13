@@ -13,7 +13,7 @@ claude setup-token          # opens a browser, prints a token valid for one year
 export CLAUDE_CODE_OAUTH_TOKEN=<token>
 ```
 
-The CLI picks that variable up automatically in print mode, so `tools/claude.sh` and the GitHub Action both work with nothing else configured. For GitHub, add the value as a repository secret named `CLAUDE_CODE_OAUTH_TOKEN` under Settings, Secrets and variables, Actions. To bill the API instead, set `ANTHROPIC_API_KEY` locally and swap `claude_code_oauth_token:` for `anthropic_api_key:` in the workflows. Only one of the two should be set.
+The CLI picks that variable up automatically in print mode, so `tools/claude.sh` and the GitHub Action both work with nothing else configured. For GitHub, add the value as a repository secret named `CLAUDE_CODE_OAUTH_TOKEN` under Settings, Secrets and variables, Actions. To bill the API instead, set `ANTHROPIC_API_KEY` locally, and add it as a repository secret for the workflows: they take whichever credential the repository variable `CLAUDE_AUTH_ORDER` names first (the fleet default is `oauth,api_key`). Locally, only one of the two should be set.
 
 Treat the token like a password. It carries your subscription's usage, cannot be scoped down per run, and lasts a year unless you re-issue it.
 
@@ -142,14 +142,16 @@ One cross-environment trap is handled in `tools/lib.sh`: a `.venv` built on the 
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `ci.yml` | push, pull request | Discovers every project and verifies each in parallel in the container; separately fails if regenerated assets differ from the committed bytes |
-| `claude.yml` | `@claude` in an issue, PR, comment or review | Claude works in the repo with the framework's commands available |
+| `claude.yml` | `@claude` in an issue, PR, comment or review, from an owner, member or collaborator | Claude works in the repo with the framework's commands available |
 | `claude-code-review.yml` | pull requests touching code | Inline review comments |
 | `claude-improve.yml` | weekly cron, or manual dispatch | Picks a project, makes one improvement, opens a pull request |
 
 `claude-improve.yml` is the autonomous path. It verifies the project first so a pre-existing failure is not blamed on the run, takes an optional project and task from `workflow_dispatch` inputs, and can only push a branch and open a pull request, so nothing reaches `main` without review.
 
-All three Claude workflows need the `CLAUDE_CODE_OAUTH_TOKEN` secret and the `anthropics/claude-code-action@v1` permissions block already in the files: `contents: write`, `pull-requests: write`, `issues: write`, `id-token: write`.
+All three Claude workflows need a Claude credential (the `CLAUDE_CODE_OAUTH_TOKEN` secret, or `ANTHROPIC_API_KEY`) and the permissions already in the files: the workflow token is read-only by default, and each job asks for the write access `anthropics/claude-code-action@v1` needs there (`contents`, `pull-requests`, `issues`, `id-token`).
+
+They are built to the fleet's harness standard (bamr87/bamr87 `_data/fleet.yml` `harnesses.standard`, `docs/HARNESS-OPS.md`): an exact model, a dollar cap, a timeout, the credential order above, and on the two that run unattended a turn cap and a kill switch. Setting the repository variable `CLAUDE_CODE_REVIEW_ENABLED` or `CLAUDE_IMPROVE_ENABLED` to `false` stops the reviews or the weekly run without a commit; a manual dispatch of the improvement run ignores its switch. `claude.yml` is the hub kit's handler (`templates/agent-context/claude.yml`) plus three things this repo needs, the Godot setup step, write permissions and the tool allowlist, so the hub's kit upgrade does not replace it: carry a kit release over by hand.
 
 ## Cost and limits
 
-Each `tools/claude.sh` run passes `--max-budget-usd` (default 10, `--budget` to change) and the improvement workflow passes 15. An OAuth token draws on the subscription's usage pool rather than API billing, so the ceiling is a guard rather than an invoice. `--dry-run` prints exactly what would be sent without spending anything, which is the right way to iterate on a prompt.
+Each `tools/claude.sh` run passes `--max-budget-usd` (default 10, `--budget` to change); the improvement workflow passes 15, the review workflow 10 and the `@claude` handler 20. An OAuth token draws on the subscription's usage pool rather than API billing, so the ceiling is a guard rather than an invoice. `--dry-run` prints exactly what would be sent without spending anything, which is the right way to iterate on a prompt.
