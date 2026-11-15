@@ -38,7 +38,8 @@ jobs:
         with:
           # Generated locally with `claude setup-token` (Pro, Max, Team or
           # Enterprise subscription) and stored as a repository secret.
-          # Swap for anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }} to bill the API instead.
+          # Claude auth: OAuth only (CLAUDE_CODE_OAUTH_TOKEN). ANTHROPIC_API_KEY disabled for now
+          # (2026-11-15); don't swap to the API key until it is restored.
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: |
             --allowedTools "Read,Glob,Grep,Edit,Write,MultiEdit,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/smoke.sh*),Bash(tools/verify.sh*),Bash(tools/new_game.sh*),Bash(tools/godot.sh --headless*),Bash(python3 tools/gen_assets.py*)"

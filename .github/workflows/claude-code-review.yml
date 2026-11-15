@@ -40,7 +40,7 @@ jobs:
           {
             echo "### Claude Code Review skipped — no credential"
             echo
-            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription), or switch this workflow to \`anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}\` to bill the API instead."
+            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription). Claude auth is OAuth only for now: the \`ANTHROPIC_API_KEY\` alternative is disabled (2026-11-15)."
             echo
             echo "The fleet propagates this secret weekly from the hub (\`token-rotation.yml\`, bamr87/bamr87 \`docs/TOKEN-ROTATION.md\`)."
           } >> "$GITHUB_STEP_SUMMARY"
