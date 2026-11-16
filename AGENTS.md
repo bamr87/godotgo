@@ -83,6 +83,7 @@ What each sample game proves about the framework is in [docs/verification.md](do
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). The PR title is the squash subject.
 - **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
 - **Changelog:** `CHANGELOG.md` is written by release-please (`release.yml`) from the PR titles. Never edit it, or a version number, by hand.
+- **Markdown and commit hooks:** Markdown is one paragraph per line: `python3 tools/unwrap-prose.py --write` fixes it, and the `markdown-oneline` workflow pushes that fix to a pull request's branch itself. `pre-commit install` once per clone runs `.pre-commit-config.yaml` before each commit, and `pre-commit run --all-files` must pass. `tools/unwrap-prose.py`, like `tools/docs_index.py`, is vendored byte-identical from the hub and never edited here.
 - **Never:** push to `main` directly, commit lockfiles or secrets, suppress type errors, leave empty exception handlers, or edit generated files by hand (`docs/reference/framework-api.md`, the docs-index span, the assets `tools/gen_assets.py` writes).
 
 ## Engine and toolchain rules
