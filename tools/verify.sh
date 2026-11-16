@@ -12,7 +12,7 @@ cd "$GODOTGO_ROOT" || exit 1
 echo "### pins"; godotgo_check_version_pins || exit 1
 godotgo_check_project_refs || exit 1
 echo "    Godot $GODOTGO_GODOT_VERSION everywhere, no dangling project references"
-# The tools' own command line (--help and usage errors), run against
+# The tools' own command line (--help, usage errors, export paths), run against
 # stand-in engines, so it needs no Godot and takes seconds.
 if cli="$("$BASH" tests/test_cli.sh 2>&1)"; then
 	echo "    $cli"

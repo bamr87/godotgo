@@ -3,7 +3,9 @@
 #   - every tool answers -h/--help with its usage on stdout and exit 0, before
 #     it downloads anything, writes anything or starts Godot or Docker;
 #   - an unknown option, or an option missing its value, is a usage error:
-#     exit 2 with the reason on stderr, never a hang and never real work.
+#     exit 2 with the reason on stderr, never a hang and never real work;
+#   - export.sh writes the build where it was told to, checks that same path,
+#     and shows a failed import instead of hiding it.
 #
 # Usage: tests/test_cli.sh
 #
@@ -225,6 +227,32 @@ expect_rc 1
 run test leap player
 expect_rc 0
 expect_call "--filter=player"
+
+# --- export.sh output paths and import failures --------------------------------
+case "$(uname -m)" in
+	arm64|aarch64) arch=arm64 ;;
+	*) arch=x86_64 ;;
+esac
+# An absolute output, outside the workspace: it used to go to Godot as
+# <root>/<absolute path> while the check looked at the path itself.
+run export leap '' "$scratch/builds/leap"
+expect_rc 0
+expect_file "$scratch/builds/leap"
+expect_in out "exported $scratch/builds/leap"
+run export leap '' build/x
+expect_rc 0
+expect_file "$ws/build/x"
+run export leap
+expect_rc 0
+expect_file "$ws/build/leap.$arch"
+export STUB_IMPORT_FAIL=1
+run export leap '' build/y
+unset STUB_IMPORT_FAIL
+expect_rc 1
+expect_in err "Could not find type"
+expect_no_file "$ws/build/y"
+checks=$((checks + 1))
+! grep -qF -- "--export-release" "$STUB_CALLS" || fail "exported after the import failed"
 
 if [ "$failures" -eq 0 ]; then
 	echo "tools CLI: all $checks checks passed"
