@@ -111,6 +111,7 @@ vendor/        third-party addons fetched by an installer (gitignored)
 games/         orb-run, leap, swarm, shift, cascade
 templates/     what tools/new_game.sh copies to start a new game
 tools/         project-aware scripts: verify, check, test, run, export, scaffold, Claude, Docker
+tests/         Godot-free tests of the tooling (stdlib unittest), run by CI
 docker/        the container CI and contributors use
 docs/          framework guide, generated API reference, game authoring, AI development, verification matrix
 .claude/       Claude Code settings, edit hook, subagents, skills
@@ -126,6 +127,7 @@ tools/check.sh [project]             # load every script, scene and resource; gd
 tools/test.sh [project] [filter]     # headless unit tests
 tools/export.sh <project> [preset]   # release build (or tools/docker.sh export <project>)
 python3 tools/gen_framework_api.py   # regenerate docs/reference/framework-api.md
+python3 -m unittest discover -s tests -v   # test the asset and docs generators; no Godot needed
 ```
 
 [AGENTS.md](AGENTS.md) is the canonical guide to working here: every command, the engine pin, the scene and UID rules, and the conventions CI enforces.

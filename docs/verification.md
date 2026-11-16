@@ -14,10 +14,11 @@ tools/verify.sh                              # check + test + smoke, every proje
 tools/verify.sh leap                         # one project
 tools/docker.sh verify                       # the same, in the container CI uses
 python3 tools/gen_assets.py && git diff --exit-code   # assets are reproducible
+python3 -m unittest discover -s tests -v     # the generators' own tests, no Godot needed
 WITH_EXPORT_TEMPLATES=1 tools/docker.sh build && tools/docker.sh export orb-run
 ```
 
-`ci.yml` discovers the project list at run time and verifies each one in parallel in the container, then separately checks that regenerating every asset produces the bytes that are committed.
+`ci.yml` discovers the project list at run time and verifies each one in parallel in the container, then separately checks that regenerating every asset produces the bytes that are committed. Beside those jobs, its `standard` job calls the fleet's shared gate (bamr87/bamr87 `standard-ci.yml@v2`), which runs the tests in `tests/` on every push and pull request, documentation-only ones included.
 
 ## The stages
 
@@ -80,7 +81,8 @@ WITH_EXPORT_TEMPLATES=1 tools/docker.sh build && tools/docker.sh export orb-run
 | Scaffolder | `tools/new_game.sh` runs check, test and smoke before it returns, and refuses to finish otherwise |
 | Empty-suite guard | Scaffolding a project, deleting its tests, and watching `tools/test.sh` fail with `no tests found` |
 | Script-fault guard | A test calling a method that does not exist reports `ok` for its own assertion, and `tools/test.sh` still fails the run on the `SCRIPT ERROR`. This caught a stale call left in Orb Run by the migration onto the framework. |
-| Deterministic assets | Regenerating every asset and diffing against the committed bytes, enforced in CI |
+| Deterministic assets | Regenerating every asset and diffing against the committed bytes, enforced in CI. `tests/test_tools.py` also runs the generator twice into empty scratch roots and requires both runs to match each other and the committed files byte for byte, so a generator that stops being deterministic (an unseeded random, a timestamp) is reported as that rather than as a stale commit. |
+| Generated docs | `tests/test_tools.py` requires `tools/docs_index.py --check` to pass on the checkout, and proves that it and `tools/gen_framework_api.py --check` fail on a scratch copy where a document or a doc comment changed without regenerating. Whether the committed API reference is current stays the advisory warning in `tools/verify.sh`'s `pins` stage, because the Claude workflows cannot run that generator yet. |
 | Docker toolchain | The same check, test and smoke commands passing inside `godotgo-tools:local` |
 | Engine export | All four games exported with `tools/docker.sh export <game>` and booted headless, each printing its session line with the right objective count. This caught text levels being stripped from builds: `.txt` files are not imported resources, so `export_filter="all_resources"` left them out and the exported platformer loaded an empty map. The presets now name them in `include_filter`. |
 | Edit hook | Every `.gd`/`.tscn`/`.tres` Claude writes is loaded by the owning project's Godot before Claude continues; it caught several errors while this workspace was built |

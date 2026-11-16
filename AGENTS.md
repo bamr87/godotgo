@@ -6,7 +6,7 @@
 
 ## What this repo is
 
-GodotGo is a workspace, not a single game, and **the repository root is not a Godot project**. A project is any directory containing `project.godot`: `framework/` (the addon plus its own test suite) and each game under `games/`. Every game symlinks `addons/godotgo` to `framework/addons/godotgo`, so there is exactly one copy of the framework and a change to it is felt everywhere at once. It serves people (and agents) building small Godot games on a shared, tested core. A change is done when `tools/verify.sh` (or `tools/verify.sh <project>` while iterating) passes.
+GodotGo is a workspace, not a single game, and **the repository root is not a Godot project**. A project is any directory containing `project.godot`: `framework/` (the addon plus its own test suite) and each game under `games/`. Every game symlinks `addons/godotgo` to `framework/addons/godotgo`, so there is exactly one copy of the framework and a change to it is felt everywhere at once. It serves people (and agents) building small Godot games on a shared, tested core. A change is done when `tools/verify.sh` (or `tools/verify.sh <project>` while iterating) passes, and so do the tooling tests in `tests/`.
 
 ## Stack & commands
 
@@ -33,6 +33,7 @@ tools/new_game.sh <slug> --title T   # scaffold a game from templates/blank and 
 python3 tools/gen_assets.py [project]       # regenerate every placeholder sprite, sound and mesh
 python3 tools/gen_framework_api.py [--check] # regenerate docs/reference/framework-api.md
 python3 tools/docs_index.py --write         # regenerate the docs index in docs/README.md
+python3 -m unittest discover -s tests -v    # the tests of the three generators above; no Godot needed
 tools/mm.sh <file.ptex> [out]        # Material Maker export via Docker
 tools/godot_ai.sh doctor|status|edit <project>   # the live-editor MCP bridge
 tools/godot.sh --headless --path <project> --script res://addons/godotgo/tools/new_uid.gd   # a real uid://
@@ -62,6 +63,7 @@ Optional lint and format: `python3 -m venv .venv && .venv/bin/pip install "gdtoo
 | `games/cascade/` | Collapse puzzle: pooled tile views, a board state machine, levels from ASCII or a seed |
 | `templates/blank/` | What `tools/new_game.sh` copies to start a new game |
 | `tools/` | The project-aware scripts above ([tools/README.md](tools/README.md)) |
+| `tests/` | Godot-free tests of the tooling: `test_tools.py` (stdlib `unittest`) covers the asset, docs-index and API generators, and `ci.yml`'s `standard` job runs it |
 | `docker/` | The toolchain image and the Material Maker image |
 | `docs/` | Framework guide, generated API reference, game authoring, AI development, verification matrix ([docs/README.md](docs/README.md)) |
 | `features/`, `verify/` | The fleet feature index and verification scenarios |
@@ -73,7 +75,7 @@ What each sample game proves about the framework is in [docs/verification.md](do
 ## Conventions
 
 - **Backlog of record:** GitHub Issues with the fleet labels (`.github/sdlc.yml`, `backlog.mode: issues`). Pick up issues labelled `agent:ready`; never touch `agent:hold` or `human-review`.
-- **Definition of Done:** `tools/verify.sh` green for every project you touched, docs updated, and the fleet default pull-request checklist (this repo has no `.github/pull_request_template.md`, so the owner's default applies).
+- **Definition of Done:** `tools/verify.sh` green for every project you touched, `python3 -m unittest discover -s tests -v` green, docs updated, and the fleet default pull-request checklist (this repo has no `.github/pull_request_template.md`, so the owner's default applies).
 - **Decisions:** ADRs in `docs/adr/NNNN-slug.md`, indexed in `docs/adr/README.md`. Add one for anything hard to reverse.
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). The PR title is the squash subject.
 - **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
@@ -125,7 +127,7 @@ The framework's classes are `Session` (the round lifecycle; each game registers 
 
 Member of the bamr87 fleet, vendored as the submodule `projects/godotgo` of [bamr87/bamr87](https://github.com/bamr87/bamr87): commit and push here first; the hub bumps its pointer afterwards. The standards live in the hub's [specs/](https://github.com/bamr87/bamr87/tree/main/specs) (the Universal Project Standard); this repo's SDLC declaration is `.github/sdlc.yml`. What acts on it:
 
-- `ci.yml` verifies every project in parallel in the container and fails if regenerated assets differ from the committed ones; `conformance.yml` and `verify.yml` call the hub's shared checks; `release.yml` runs release-please.
+- `ci.yml` calls the hub's shared gate, `standard-ci.yml@v2` (its `standard` job runs the tooling tests in `tests/`), verifies every project in parallel in the container, and fails if regenerated assets differ from the committed ones; `conformance.yml` and `verify.yml` call the hub's shared checks; `release.yml` runs release-please.
 - `claude.yml` answers `@claude`, `claude-code-review.yml` reviews pull requests, and `claude-improve.yml` runs weekly or on demand, improves one project and opens a pull request (kill switch: repository variable `CLAUDE_IMPROVE_ENABLED=false`). All three authenticate with the `CLAUDE_CODE_OAUTH_TOKEN` secret.
 - The hub's fleet loops (fleet-pulse doctor, issue pipeline, standardization fan-outs) open pull requests here; none of them merges.
 
