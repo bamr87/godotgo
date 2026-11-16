@@ -270,8 +270,9 @@ godotgo_usage() {
 
 # -h or --help among the arguments prints the calling tool's usage and exits 0.
 # Every tool calls it straight after sourcing this file, so asking for help
-# never starts anything. docker.sh passes only its first argument, because
-# everything after a command belongs to that command.
+# never starts anything. docker.sh and run.sh pass only their first argument,
+# because everything after docker.sh's command belongs to that command and
+# everything after run.sh's project goes to Godot.
 godotgo_help() {
 	local arg
 	for arg in "$@"; do
