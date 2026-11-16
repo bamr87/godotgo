@@ -76,8 +76,7 @@ Scene files are text and can be written directly. Three things must be right:
 
 1. A real `uid://`, from
 `tools/godot.sh --headless --path games/<slug> --script res://addons/godotgo/tools/new_uid.gd`. Never invent one: an over-long value is silently accepted through 64-bit wraparound and then rewritten the first time the editor saves.
-2. `load_steps` equal to the number of `ext_resource` plus `sub_resource` entries,
-   plus one.
+2. `load_steps` equal to the number of `ext_resource` plus `sub_resource` entries, plus one.
 3. Nodes in tree order, with `parent="."` for children of the root.
 
 Then `tools/check.sh <slug>`, which loads every scene and catches missing resources and wrong counts.
