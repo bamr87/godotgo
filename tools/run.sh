@@ -7,7 +7,9 @@
 #   Everything after the project goes to Godot as is.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-godotgo_help "$@"
+# Only the project argument: after it, --help belongs to Godot
+# (tools/run.sh leap --help shows Godot's own help).
+godotgo_help "${1:-}"
 case "${1:-}" in -*) godotgo_reject_option "$1" ;; esac
 cd "$GODOTGO_ROOT" || exit 1
 

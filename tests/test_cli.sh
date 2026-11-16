@@ -165,9 +165,13 @@ expect_no_file "$ws/games/dodge"
 # command's, so it reaches the container (the docker stand-in here).
 run docker verify --help
 expect_call "godot tools/verify.sh --help"
+# run.sh likewise: everything after the project goes to Godot as is.
+run run leap --help
+expect_not_in out "Usage:"
+expect_call "godot --path games/leap --help"
 
 # --- unknown options: exit 2 with the reason and usage, before any work ------
-for tool in verify check test smoke run export install_godot; do
+for tool in verify check test smoke run export install_godot install_godot_ai; do
 	run "$tool" --bogus
 	expect_rc 2
 	expect_in err "unknown option '--bogus'"
