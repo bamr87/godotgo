@@ -2,7 +2,7 @@
 
 # godotgo
 
-> A workspace for building Godot 4 games: one shared framework addon, five sample games that exercise it, tooling that treats every project the same, and a Claude Code integration that can build, test and improve any of them.
+> GodotGo's direction is to become the ultimate open home for all things Godot game-making: data, tools, resources and transparency, with one reusable framework, identical tooling for every game, and an agent-ready build-and-test loop for everyone ([constitution](docs/constitution.md) §1).
 
 ## What this repo is
 

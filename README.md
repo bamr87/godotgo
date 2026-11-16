@@ -1,6 +1,6 @@
 # GodotGo
 
-> Godot 4 game workspace: one reusable framework, five sample games and tooling that treats every project the same.
+> GodotGo's direction is to become the ultimate open home for all things Godot game-making: data, tools, resources and transparency, with one reusable framework, identical tooling for every game, and an agent-ready build-and-test loop for everyone ([constitution](docs/constitution.md) §1).
 
 [![CI](https://github.com/bamr87/godotgo/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/godotgo/actions/workflows/ci.yml) [![License](https://img.shields.io/github/license/bamr87/godotgo)](LICENSE)
 
