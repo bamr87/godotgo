@@ -134,6 +134,7 @@ Member of the bamr87 fleet, vendored as the submodule `projects/godotgo` of [bam
 - `ci.yml` verifies every project in parallel in the container and fails if regenerated assets differ from the committed ones; `conformance.yml` and `verify.yml` call the hub's shared checks; `release.yml` runs release-please.
 - `claude.yml` answers `@claude`, `claude-code-review.yml` reviews pull requests, and `claude-improve.yml` runs weekly or on demand, improves one project and opens a pull request (kill switch: repository variable `CLAUDE_IMPROVE_ENABLED=false`). All three authenticate with the `CLAUDE_CODE_OAUTH_TOKEN` secret.
 - The hub's fleet loops (fleet-pulse doctor, issue pipeline, standardization fan-outs) open pull requests here; none of them merges.
+- `markdown-oneline.yml`, seeded by the hub's prose kit, holds Markdown to one paragraph per line: on a pull request from this repository it unwraps wrapped prose and pushes the fix to the branch itself, and it fails only where it cannot push (a fork, or a push to `main`). Change it only through the hub kit (`tools/fanout.sh --kit prose --upgrade`).
 
 ## Standard deviations
 

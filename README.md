@@ -39,7 +39,7 @@ tools/docker.sh build && tools/docker.sh verify
 
 Optional lint and format: `python3 -m venv .venv && .venv/bin/pip install "gdtoolkit==4.*"`.
 
-Commit hooks: `python3 -m pip install pre-commit && pre-commit install`, once per clone. Before each commit they check whitespace, YAML, every shell script (shellcheck), one paragraph per line in Markdown, and that the generated API reference and docs index are current; `pre-commit run --all-files` runs them on everything.
+Commit hooks: `python3 -m venv .venv && .venv/bin/pip install pre-commit && .venv/bin/pre-commit install`, once per clone. The virtualenv is there because Homebrew's Python and other PEP 668 installs refuse a plain `pip install`; `pipx install pre-commit && pre-commit install` works as well. Before each commit they check whitespace, YAML, every shell script (shellcheck), one paragraph per line in Markdown, and that the generated API reference and docs index are current; `pre-commit run --all-files` runs them on everything.
 
 ## The sample games
 
