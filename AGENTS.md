@@ -36,7 +36,11 @@ python3 tools/docs_index.py --write         # regenerate the docs index in docs/
 tools/mm.sh <file.ptex> [out]        # Material Maker export via Docker
 tools/godot_ai.sh doctor|status|edit <project>   # the live-editor MCP bridge
 tools/godot.sh --headless --path <project> --script res://addons/godotgo/tools/new_uid.gd   # a real uid://
+tools/<script>.sh --help             # any script's usage, without running anything (godot.sh passes it to Godot)
+tests/test_cli.sh                    # the scripts' command-line contract, no Godot needed; verify.sh runs it
 ```
+
+A usage error (an unknown option, an option missing its value) exits 2 with the reason and the usage on stderr; [tools/README.md](tools/README.md#command-line) has the whole contract.
 
 The same scripts run in the container CI uses, which needs nothing but Docker:
 
@@ -62,6 +66,7 @@ Optional lint and format: `python3 -m venv .venv && .venv/bin/pip install "gdtoo
 | `games/cascade/` | Collapse puzzle: pooled tile views, a board state machine, levels from ASCII or a seed |
 | `templates/blank/` | What `tools/new_game.sh` copies to start a new game |
 | `tools/` | The project-aware scripts above ([tools/README.md](tools/README.md)) |
+| `tests/` | `test_cli.sh`: the tools' command-line contract, run against stand-in engines in a scratch copy of `tools/` |
 | `docker/` | The toolchain image and the Material Maker image |
 | `docs/` | Framework guide, generated API reference, game authoring, AI development, verification matrix ([docs/README.md](docs/README.md)) |
 | `features/`, `verify/` | The fleet feature index and verification scenarios |
@@ -85,8 +90,8 @@ What each sample game proves about the framework is in [docs/verification.md](do
 - **One engine pin.** The version lives once, as `GODOTGO_GODOT_VERSION` in `tools/lib.sh`. `tools/install_godot.sh` fetches it into `.godot-bin/` (gitignored), `tools/docker.sh` passes it to the image build, and the CI action reads it from the same variable. Bumping the engine means editing that one line, running the installer, and rebuilding both images (`tools/docker.sh build`, `tools/docker.sh mm-build`); every project declares the matching `config/features` level.
 - `tools/godot.sh` resolves `$GODOT_BIN`, then `.godot-bin/godot`, then `godot` on `PATH` and the macOS app bundles.
 - **Never use `godot --check-only`.** It cannot resolve autoload singletons, and on macOS it exits 0 even for parse errors. `framework/addons/godotgo/tools/check_scripts.gd` loads files inside a live `SceneTree` instead; `tools/check.sh` and the edit hook both call it.
-- macOS ships bash 3.2 and no `timeout`; every script is written for that.
-- `tools/verify.sh` opens with a `pins` stage: every place that names the engine (both Dockerfiles, compose, each `config/features`) must agree with `GODOTGO_GODOT_VERSION`, the installed Godot AI addon must match `GODOTGO_GODOT_AI_VERSION`, and no `project.godot` may reference an autoload or editor plugin that is not on disk. It also warns (without failing) when `docs/reference/framework-api.md` is stale.
+- macOS ships bash 3.2 and no `timeout`; every script is written for that. `tests/test_cli.sh` passes under `/bin/bash` 3.2 and bounds each run with `perl -e 'alarm N; exec @ARGV'` instead.
+- `tools/verify.sh` opens with a `pins` stage: every place that names the engine (both Dockerfiles, compose, each `config/features`) must agree with `GODOTGO_GODOT_VERSION`, the installed Godot AI addon must match `GODOTGO_GODOT_AI_VERSION`, no `project.godot` may reference an autoload or editor plugin that is not on disk, and `tests/test_cli.sh` must pass. It also warns (without failing) when `docs/reference/framework-api.md` is stale.
 
 ## Verification loop
 

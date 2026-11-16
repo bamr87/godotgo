@@ -13,13 +13,15 @@
 # particle or shader materials are alive at quit. Every other ERROR line fails.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 expect="\[godotgo\] session start"
 names=()
 while [ $# -gt 0 ]; do
 	case "$1" in
-		--expect) expect="$2"; shift 2 ;;
+		--expect) godotgo_need_value "$@"; expect="$2"; shift 2 ;;
+		-*) godotgo_reject_option "$1" ;;
 		*) names+=("$1"); shift ;;
 	esac
 done

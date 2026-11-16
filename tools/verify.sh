@@ -5,11 +5,21 @@
 # Usage: tools/verify.sh [project ...]
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+godotgo_no_options "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 echo "### pins"; godotgo_check_version_pins || exit 1
 godotgo_check_project_refs || exit 1
 echo "    Godot $GODOTGO_GODOT_VERSION everywhere, no dangling project references"
+# The tools' own command line (--help and usage errors), run against
+# stand-in engines, so it needs no Godot and takes seconds.
+if cli="$("$BASH" tests/test_cli.sh 2>&1)"; then
+	echo "    $cli"
+else
+	echo "$cli" >&2
+	exit 1
+fi
 # docs/reference/framework-api.md is generated from the framework's doc comments.
 # Advisory for now: the Claude workflows' tool allowlists cannot run the
 # generator yet, so a stale reference warns instead of failing the gate.

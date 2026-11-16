@@ -6,7 +6,9 @@
 #        tools/test.sh leap player    only tests whose file or method matches
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+godotgo_no_options "$@"   # before the loop below can take one for the filter
+cd "$GODOTGO_ROOT" || exit 1
 
 # Arguments may name projects and, at most, one filter. Anything that resolves
 # to a project is one; the first thing that does not is the filter. Getting this

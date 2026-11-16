@@ -12,9 +12,11 @@
 #
 # Environment: MM_TARGET (default "Godot/Godot 4 Standard"), MM_TIMEOUT seconds.
 set -o pipefail
-cd "$(dirname "$0")/.."
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+godotgo_help "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
-ptex="$1"
+ptex="${1:-}"
 if [[ -z "$ptex" || ! -f "$ptex" ]]; then
 	echo "usage: tools/mm.sh <material.ptex> [output-dir]" >&2
 	exit 2
@@ -43,7 +45,8 @@ docker compose -f docker/compose.yml run --rm \
 fresh="$(find "$out" -newer "$stamp" -type f \( -name "$name.tres" -o -name "${name}_*.png" \) | sort)"
 rm -f "$stamp"
 if [[ -n "$fresh" ]]; then
-	echo "==> exported:"; echo "$fresh" | sed 's/^/    /'
+	echo "==> exported:"
+	while IFS= read -r f; do echo "    $f"; done <<<"$fresh"
 	[[ -f "$out/$name.tres" ]] && ! grep -q "$name.tres" <<<"$fresh" && echo "    (kept existing $out/$name.tres)"
 	echo "==> run tools/check.sh (or tools/docker.sh check) so Godot imports the new PNGs"
 	exit 0

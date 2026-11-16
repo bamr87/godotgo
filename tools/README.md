@@ -15,10 +15,19 @@
 | [`godot_ai.sh`](godot_ai.sh) | Drive the Godot AI MCP bridge for a project in this workspace |
 | [`install_godot.sh`](install_godot.sh) | Download the Godot release this workspace targets into .godot-bin/, so the host runs exactly the engine the container and CI run |
 | [`install_godot_ai.sh`](install_godot_ai.sh) | Install the Godot AI editor addon (github.com/hi-godot/godot-ai, MIT) into every project in this workspace, so a live editor can be driven… |
-| [`lib.sh`](lib.sh) | Shared helpers for the GodotGo workspace tools: locate the root, enumerate Godot projects, and resolve a friendly project name to a path |
+| [`lib.sh`](lib.sh) | Shared helpers for the GodotGo workspace tools: locate the root, enumerate Godot projects, resolve a friendly project name to a path, and the command-line contract below |
 | [`mm.sh`](mm.sh) | Export a Material Maker material into the project with the Docker image |
 | [`new_game.sh`](new_game.sh) | Scaffold a new Godot game in games/<slug> from templates/<template> |
 | [`run.sh`](run.sh) | Play a game with a window |
 | [`smoke.sh`](smoke.sh) | Boot a game's main scene without a window and fail on any error or warning |
 | [`test.sh`](test.sh) | Run headless test suites (tests/unit/test_*.gd) with the framework's runner |
 | [`verify.sh`](verify.sh) | The full verification pass: check, test and smoke every project (or the ones named) |
+
+## Command line
+
+Every script here except `godot.sh`, which hands all its arguments to Godot, keeps the same contract:
+
+- **`-h` or `--help` prints the script's usage and exits 0** before it does anything: nothing is downloaded or written, and neither Godot nor Docker starts. The usage is the script's own header comment, so it cannot drift from the code. In `docker.sh` only the first argument counts: after a command, `--help` belongs to that command, so `tools/docker.sh verify --help` shows `verify.sh`'s usage.
+- **A usage error exits 2**, with the reason and the usage on stderr: the code `lib.sh` already gave an unknown project name. That covers an option missing its value, such as the bare `--title` in `tools/new_game.sh dodge --title`, which used to loop forever. It also covers an option the script does not define in `verify`, `check`, `test`, `smoke`, `run`, `export`, `new_game`, `install_godot` and `install_godot_ai`, where it used to be taken for a project name, a test filter or nothing at all. `run.sh` checks only its project argument, because everything after the project goes to Godot.
+
+[`tests/test_cli.sh`](../tests/test_cli.sh) holds every script to this. It runs them from a scratch copy of this directory with stand-in engine, Docker, `curl` and `claude` commands, under a watchdog, so it needs neither Godot nor Docker, takes a few seconds, and passes under macOS's bash 3.2. `tools/verify.sh` runs it in its `pins` stage. `shellcheck -x tools/*.sh` is clean; the root `.shellcheckrc` points it at `lib.sh`.

@@ -16,7 +16,10 @@
 #   tools/docker.sh mm-build [--no-cache]     rebuild the Material Maker image
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+# Only the first argument: after a command, --help belongs to that command
+# (tools/docker.sh verify --help shows tools/verify.sh's usage).
+godotgo_help "${1:-}"
+cd "$GODOTGO_ROOT" || exit 1
 
 # One source of truth for the engine version: compose reads it from here.
 export GODOT_VERSION="$GODOTGO_GODOT_VERSION"
@@ -36,5 +39,5 @@ case "$cmd" in
 	exec) exec "${run[@]}" godot "$@" ;;
 	shell) exec "${run[@]}" godot bash ;;
 	mcp) exec "${run[@]}" -i --no-TTY mcp ;;
-	*) echo "unknown command: $cmd" >&2; sed -n '2,/^set -o/p' "$0" | sed '$d' >&2; exit 2 ;;
+	*) godotgo_usage_error "unknown command '$cmd'" ;;
 esac

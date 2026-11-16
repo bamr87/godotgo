@@ -11,7 +11,9 @@
 # `tools/docker.sh export <project>`.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+godotgo_no_options "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 proj="$(godotgo_resolve "${1:-}")" || exit 2
 shift
