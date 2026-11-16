@@ -150,7 +150,7 @@ func try_pop(cell: Vector2i) -> int:
 	# No legal pop left ends the round whichever way it goes; the session reads
 	# the target to say which.
 	if board.is_stuck():
-		Game.finish_board(board.is_empty())
+		Game.finish_board(board.is_empty(), board.remaining())
 	return count
 
 

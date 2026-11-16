@@ -13,7 +13,7 @@ tools/smoke.sh cascade        # windowless boot
 
 Click any group of two or more touching tiles of the same colour and they go. What was above them falls, and a column emptied outright is closed up by the columns to its right sliding over. A group is worth `n * (n - 1)`, so six tiles taken together pay 30 and the same six taken as three pairs pay 6: the game is about growing a group and choosing when to spend it.
 
-Clear the target share of the board (70% by default) and the level is beaten. The round does not end there — a board is still worth playing for a perfect clear, which pays a bonus of its own. It ends when no legal pop is left, and the target decides whether that ending was a win or a loss. `R` restarts, `N` moves on once a board is beaten.
+Clear the target share of the board (70% by default) and the level is beaten. The round does not end there — a board is still worth playing for a perfect clear, which pays a bonus of its own, and a win that jams with only 1–5 tiles left pays a smaller near-clear bonus (500 for one tile, down to 100 for five). It ends when no legal pop is left, and the target decides whether that ending was a win or a loss. `R` restarts, `N` moves on once a board is beaten.
 
 ## What it is here to prove
 

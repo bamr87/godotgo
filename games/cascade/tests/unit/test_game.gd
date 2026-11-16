@@ -133,3 +133,28 @@ func test_reset_clears_the_counters_and_says_so() -> void:
 	assert_eq(Game.state, Session.State.READY)
 	assert_eq(changes.size(), 1)
 	assert_eq(changes[0][0], 0)
+
+
+func test_near_clear_bonus_shrinks_with_every_stranded_tile() -> void:
+	assert_eq(Game.near_clear_bonus(1), 500)
+	assert_eq(Game.near_clear_bonus(5), 100)
+	assert_eq(Game.near_clear_bonus(0), 0, "a perfect clear has its own bonus")
+	assert_eq(Game.near_clear_bonus(6), 0)
+
+
+func test_a_won_board_with_few_tiles_left_is_paid_the_near_clear_bonus() -> void:
+	Game.start(6, 0.0)
+	Game.record_pop(6)
+	var earned := Game.score
+	Game.finish_board(false, 2)
+	assert_eq(Game.state, Session.State.WON)
+	assert_eq(Game.score, earned + Game.near_clear_bonus(2))
+
+
+func test_a_lost_board_earns_no_near_clear_bonus() -> void:
+	Game.start(20, 0.0)
+	Game.record_pop(4)
+	var earned := Game.score
+	Game.finish_board(false, 1)
+	assert_eq(Game.state, Session.State.LOST)
+	assert_eq(Game.score, earned)
