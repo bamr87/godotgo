@@ -37,8 +37,8 @@ jobs:
       - id: probe
         env:
           # A comparison, never the value: this prints true or false. Either
-          # credential arms the review; the claude-auth step below picks one.
-          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
+          # credential arms the review (OAuth only for now).
+          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
         run: |
           set -euo pipefail
           echo "armed=$ARMED" >> "$GITHUB_OUTPUT"
@@ -46,11 +46,11 @@ jobs:
             echo "A Claude credential is present — running the review."
             exit 0
           fi
-          echo "::warning title=Review skipped::No CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY on $GITHUB_REPOSITORY, so Claude cannot review this pull request. Skipping instead of failing."
+          echo "::warning title=Review skipped::No CLAUDE_CODE_OAUTH_TOKEN on $GITHUB_REPOSITORY, so Claude cannot review this pull request. Skipping instead of failing."
           {
             echo "### Claude Code Review skipped — no credential"
             echo
-            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription), or an \`ANTHROPIC_API_KEY\` secret to bill the API instead. The review takes whichever the \`CLAUDE_AUTH_ORDER\` repository variable names first (default: oauth, then api_key)."
+            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription). Claude auth is OAuth only for now: the \`ANTHROPIC_API_KEY\` alternative is disabled (2026-11-15)."
             echo
             echo "The fleet propagates this secret weekly from the hub (\`token-rotation.yml\`, bamr87/bamr87 \`docs/TOKEN-ROTATION.md\`)."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -81,12 +81,10 @@ jobs:
         with:
           order: ${{ vars.CLAUDE_AUTH_ORDER }}
           has-oauth: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
-          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ steps.claude-auth.outputs.method == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
-          anthropic_api_key: ${{ steps.claude-auth.outputs.method == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
           plugins: "code-review@claude-code-plugins"
           prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
