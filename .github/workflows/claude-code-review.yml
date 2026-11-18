@@ -10,16 +10,25 @@ on:
       - "tools/**"
       - "docker/**"
 
+# Least privilege by default; the review job below asks for what it needs.
+permissions:
+  contents: read
+
 jobs:
-  # The review needs a Claude credential, and this is the only input the action
-  # below is given. Without it claude-code-action exits non-zero with an empty
-  # `claude_code_oauth_token`, which is how every Claude Code Review run on this
-  # repo failed until the secret was added on 2026-10-26 — 13 red runs, each
-  # after installing Godot, for a missing credential rather than anything in the
-  # pull request. Ask first, so an absent secret is a skip, not a failure (and
-  # not a wasted Godot install either).
+  # The review needs a Claude credential. Without one claude-code-action exits
+  # non-zero with an empty `claude_code_oauth_token`, which is how every Claude
+  # Code Review run on this repo failed until the secret was added on
+  # 2026-10-26 — 13 red runs, each after installing Godot, for a missing
+  # credential rather than anything in the pull request. Ask first, so an absent
+  # secret is a skip, not a failure (and not a wasted Godot install either).
+  #
+  # Kill switch (fleet convention — bamr87/bamr87 docs/HARNESS-OPS.md): the
+  # repository variable CLAUDE_CODE_REVIEW_ENABLED=false stops the reviews
+  # without a commit. Absent, or anything but 'false', keeps them on. Skipping
+  # this job skips the review that needs it.
   preflight:
     name: Claude credential present?
+    if: ${{ vars.CLAUDE_CODE_REVIEW_ENABLED != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -27,20 +36,21 @@ jobs:
     steps:
       - id: probe
         env:
-          # A comparison, never the value: this prints true or false.
-          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+          # A comparison, never the value: this prints true or false. Either
+          # credential arms the review; the claude-auth step below picks one.
+          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
         run: |
           set -euo pipefail
           echo "armed=$ARMED" >> "$GITHUB_OUTPUT"
           if [ "$ARMED" = "true" ]; then
-            echo "CLAUDE_CODE_OAUTH_TOKEN is present — running the review."
+            echo "A Claude credential is present — running the review."
             exit 0
           fi
-          echo "::warning title=Review skipped::No CLAUDE_CODE_OAUTH_TOKEN on $GITHUB_REPOSITORY, so Claude cannot review this pull request. Skipping instead of failing."
+          echo "::warning title=Review skipped::No CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY on $GITHUB_REPOSITORY, so Claude cannot review this pull request. Skipping instead of failing."
           {
             echo "### Claude Code Review skipped — no credential"
             echo
-            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription), or switch this workflow to \`anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}\` to bill the API instead."
+            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription), or an \`ANTHROPIC_API_KEY\` secret to bill the API instead. The review takes whichever the \`CLAUDE_AUTH_ORDER\` repository variable names first (default: oauth, then api_key)."
             echo
             echo "The fleet propagates this secret weekly from the hub (\`token-rotation.yml\`, bamr87/bamr87 \`docs/TOKEN-ROTATION.md\`)."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -49,6 +59,7 @@ jobs:
     needs: preflight
     if: github.event.pull_request.draft == false && needs.preflight.outputs.armed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write
@@ -62,10 +73,34 @@ jobs:
       - name: Install Godot and gdtoolkit
         uses: ./.github/actions/setup-godot
 
+      # The credential comes from this repo's CLAUDE_AUTH_ORDER (ai_auth: in
+      # bamr87/bamr87 _data/fleet.yml) — a method NAME, never a secret, in the output.
+      - name: Choose the Claude credential (ai_auth order)
+        id: claude-auth
+        uses: bamr87/bamr87/.github/actions/claude-auth@v2
+        with:
+          order: ${{ vars.CLAUDE_AUTH_ORDER }}
+          has-oauth: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
       - uses: anthropics/claude-code-action@v1
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_code_oauth_token: ${{ steps.claude-auth.outputs.method == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          anthropic_api_key: ${{ steps.claude-auth.outputs.method == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
           plugins: "code-review@claude-code-plugins"
           prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
-          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment,Read,Glob,Grep,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/verify.sh*)"'
+          # The fleet's harness standard (bamr87/bamr87 _data/fleet.yml
+          # `harnesses.standard`): an exact model from the allowlist, never the
+          # action's default of the day, a turn cap and a dollar ceiling.
+          # TURN CAP, sized from data: the two reviews that have run to a
+          # result took 4 and 10 turns (runs 41123365199 and 40141833223), so
+          # 1.5 x 10 rounded up to the next ten. Both were small docs and
+          # config pull requests: raise it if a review of a large change is cut
+          # off. The dollar ceiling is the fleet floor (budget.default_usd),
+          # well above 0.15 USD x 20 turns.
+          claude_args: |
+            --model claude-sonnet-5-5
+            --max-turns 20
+            --max-budget-usd 10
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Read,Glob,Grep,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/verify.sh*)"
