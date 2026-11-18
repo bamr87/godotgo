@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0](https://github.com/bamr87/godotgo/compare/v0.2.0...v0.3.0) (2026-11-18)
+
+
+### Added
+
+* **cascade:** pay a near-clear bonus for won boards with few tiles left ([d4b1d4b](https://github.com/bamr87/godotgo/commit/d4b1d4bc346d95bf298767f1af36465d83bedf16))
+* **cascade:** pay a near-clear bonus for won boards with few tiles left ([f3e0b31](https://github.com/bamr87/godotgo/commit/f3e0b31ce37ace42539859e9622146a8922a91a6))
+
+
+### Fixed
+
+* **tools:** answer --help, exit 2 on bad options, and fix export.sh output paths ([1fcda27](https://github.com/bamr87/godotgo/commit/1fcda2763d87d4cd373b9c090625ce68acd0bb97))
+* **tools:** answer -h/--help and fail fast on bad options in every tool ([6f71a2d](https://github.com/bamr87/godotgo/commit/6f71a2d4cbaa2f6803d820ea757f1530aeb75516))
+* **tools:** export.sh writes and checks one output path, shows a failed import ([ae49e53](https://github.com/bamr87/godotgo/commit/ae49e53fe22d260fca6ea3073beacc92c17bff6d)), closes [#25](https://github.com/bamr87/godotgo/issues/25)
+* **tools:** run.sh passes --help after the project to Godot ([5c10677](https://github.com/bamr87/godotgo/commit/5c10677dc752365a71a2d098a54353fb3fd6f177))
+
+
+### Documentation
+
+* **agents:** merge the two tests/ rows ([de8a3eb](https://github.com/bamr87/godotgo/commit/de8a3eb3460915ffc120d1a79dab7a8d08c499a7))
+* **constitution:** state the missions in §1 (amendment 0002) ([1249b00](https://github.com/bamr87/godotgo/commit/1249b008f062b9dff9d15392bdf3f6026d07332a))
+* **constitution:** state the missions in §1 (amendment 0002) ([50d511e](https://github.com/bamr87/godotgo/commit/50d511e310b3893b31044ef81b1cd879ed79d156))
+* list markdown-oneline.yml in AGENTS.md and install pre-commit in a venv ([9c121b6](https://github.com/bamr87/godotgo/commit/9c121b60343410282b11fd0f70f22b563a519f43))
+* **tools:** scope the command-line contract to the shell scripts ([8f647e2](https://github.com/bamr87/godotgo/commit/8f647e2add810777fbfbc7f75bf5ef41d53484fe)), closes [#24](https://github.com/bamr87/godotgo/issues/24)
+
 ## [0.2.0](https://github.com/bamr87/godotgo/compare/v0.1.0...v0.2.0) (2026-10-31)
 
 
