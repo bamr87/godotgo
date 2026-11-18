@@ -12,8 +12,9 @@ export_credentials.cfg
 .DS_Store
 Thumbs.db
 
-# Python tooling (gdtoolkit)
+# Python tooling (gdtoolkit), and the bytecode the tests in tests/ leave behind
 .venv/
+__pycache__/
 
 # Editors
 *.swp

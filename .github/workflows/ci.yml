@@ -5,10 +5,30 @@ on:
     branches: [main]
   pull_request:
 
-# Every project in the workspace is checked, tested and smoke-booted inside the
-# same container image the maintainers use locally, so a green run here and a
-# green `tools/verify.sh` on a laptop mean the same thing.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # The fleet's one shared gate (UPS-QA-20): the hub's reusable standard-ci.yml,
+  # pinned to its major tag. The workspace has no root package.json,
+  # pyproject.toml or Gemfile for it to detect, so its work here is
+  # `test-command`, the Godot-free tests of the tooling in tests/. They check
+  # generated docs too, so a docs-only change runs them as well. It runs beside
+  # the Godot jobs below, never instead of them.
+  standard:
+    uses: bamr87/bamr87/.github/workflows/standard-ci.yml@v2
+    secrets: inherit
+    with:
+      test-command: python3 -m unittest discover -s tests -v
+      skip-docs-only: false
+
+  # Every project in the workspace is checked, tested and smoke-booted inside the
+  # same container image the maintainers use locally, so a green run here and a
+  # green `tools/verify.sh` on a laptop mean the same thing.
   discover:
     runs-on: ubuntu-latest
     outputs:
