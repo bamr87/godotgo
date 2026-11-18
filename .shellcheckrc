@@ -1,0 +1,5 @@
+# ShellCheck settings for every script in the repository.
+# The tools source tools/lib.sh as "$(dirname "${BASH_SOURCE[0]}")/lib.sh":
+# look for it beside the script being checked, and follow it without -x.
+source-path=SCRIPTDIR
+external-sources=true

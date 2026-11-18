@@ -8,7 +8,9 @@
 #        tools/check.sh leap scripts/x.gd   specific files in that project
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+godotgo_no_options "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 GODOT="tools/godot.sh"
 status=0

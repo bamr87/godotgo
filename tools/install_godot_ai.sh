@@ -19,7 +19,8 @@
 # signed manifest and there is no reason not to check it.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 force=0
 uninstall=0
@@ -27,7 +28,8 @@ for arg in "$@"; do
 	case "$arg" in
 		--force) force=1 ;;
 		--uninstall) uninstall=1 ;;
-		*) echo "usage: tools/install_godot_ai.sh [--force] [--uninstall]" >&2; exit 2 ;;
+		-*) godotgo_reject_option "$arg" ;;
+		*) godotgo_usage_error "unexpected argument '$arg'" ;;
 	esac
 done
 
