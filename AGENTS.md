@@ -67,8 +67,7 @@ Optional lint and format: `python3 -m venv .venv && .venv/bin/pip install "gdtoo
 | `games/cascade/` | Collapse puzzle: pooled tile views, a board state machine, levels from ASCII or a seed |
 | `templates/blank/` | What `tools/new_game.sh` copies to start a new game |
 | `tools/` | The project-aware scripts above ([tools/README.md](tools/README.md)) |
-| `tests/` | Godot-free tests of the tooling: `test_tools.py` (stdlib `unittest`) covers the asset, docs-index and API generators, and `ci.yml`'s `standard` job runs it |
-| `tests/` | `test_cli.sh`: the tools' command-line contract, run against stand-in engines in a scratch copy of `tools/` |
+| `tests/` | The tooling's own tests, no Godot needed: `test_cli.sh` (the tools' command-line contract, run against stand-in engines in a scratch copy of `tools/`) and `test_tools.py` (stdlib `unittest`: the asset, docs-index and API generators, run by `ci.yml`'s `standard` job) |
 | `docker/` | The toolchain image and the Material Maker image |
 | `docs/` | Framework guide, generated API reference, game authoring, AI development, verification matrix ([docs/README.md](docs/README.md)) |
 | `features/`, `verify/` | The fleet feature index and verification scenarios |
