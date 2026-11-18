@@ -21,6 +21,7 @@
 | [`run.sh`](run.sh) | Play a game with a window |
 | [`smoke.sh`](smoke.sh) | Boot a game's main scene without a window and fail on any error or warning |
 | [`test.sh`](test.sh) | Run headless test suites (tests/unit/test_*.gd) with the framework's runner |
+| [`unwrap-prose.py`](unwrap-prose.py) | Join soft-wrapped Markdown prose so each paragraph is one line (`--check`, `--diff`, `--write`), leaving code, tables, list structure, HTML and front matter as they are; the `markdown-oneline` workflow and the pre-commit hook run it; vendored byte-identical from the bamr87 hub, never edited here |
 | [`verify.sh`](verify.sh) | The full verification pass: check, test and smoke every project (or the ones named) |
 
 ## Command line

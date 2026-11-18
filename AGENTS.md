@@ -83,6 +83,7 @@ What each sample game proves about the framework is in [docs/verification.md](do
 - **Commits:** Conventional Commits (`feat fix docs style refactor test chore perf ci build`). The PR title is the squash subject.
 - **Branches:** `feature/`, `fix/`, `docs/`, `refactor/`, `test/` or `chore/` off `main`.
 - **Changelog:** `CHANGELOG.md` is written by release-please (`release.yml`) from the PR titles. Never edit it, or a version number, by hand.
+- **Markdown and commit hooks:** Markdown is one paragraph per line: `python3 tools/unwrap-prose.py --write` fixes it, and the `markdown-oneline` workflow pushes that fix to a pull request's branch itself. `pre-commit install` once per clone runs `.pre-commit-config.yaml` before each commit, and `pre-commit run --all-files` must pass. `tools/unwrap-prose.py`, like `tools/docs_index.py`, is vendored byte-identical from the hub and never edited here.
 - **Never:** push to `main` directly, commit lockfiles or secrets, suppress type errors, leave empty exception handlers, or edit generated files by hand (`docs/reference/framework-api.md`, the docs-index span, the assets `tools/gen_assets.py` writes).
 
 ## Engine and toolchain rules
@@ -133,6 +134,7 @@ Member of the bamr87 fleet, vendored as the submodule `projects/godotgo` of [bam
 - `ci.yml` verifies every project in parallel in the container and fails if regenerated assets differ from the committed ones; `conformance.yml` and `verify.yml` call the hub's shared checks; `release.yml` runs release-please.
 - `claude.yml` answers `@claude` from an owner, member or collaborator, `claude-code-review.yml` reviews pull requests (kill switch: repository variable `CLAUDE_CODE_REVIEW_ENABLED=false`), and `claude-improve.yml` runs weekly or on demand, improves one project and opens a pull request (kill switch: repository variable `CLAUDE_IMPROVE_ENABLED=false`). All three are built to the hub's harness standard (`_data/fleet.yml` `harnesses.standard`): an exact model, a dollar cap, a timeout, and the credential the repository variable `CLAUDE_AUTH_ORDER` names first (by default the `CLAUDE_CODE_OAUTH_TOKEN` secret, then `ANTHROPIC_API_KEY`).
 - The hub's fleet loops (fleet-pulse doctor, issue pipeline, standardization fan-outs) open pull requests here; none of them merges.
+- `markdown-oneline.yml`, seeded by the hub's prose kit, holds Markdown to one paragraph per line: on a pull request from this repository it unwraps wrapped prose and pushes the fix to the branch itself, and it fails only where it cannot push (a fork, or a push to `main`). Change it only through the hub kit (`tools/fanout.sh --kit prose --upgrade`).
 
 ## Standard deviations
 

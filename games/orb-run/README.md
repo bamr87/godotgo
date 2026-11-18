@@ -17,5 +17,4 @@ inert until every orb is collected, which is the framework's `objective_reached`
 buffering, sprint, and a landing speed sampled before `move_and_slide()` because the slide zeroes it.
 - **The Material Maker pipeline.** `materials/starter` and `materials/metal` are
 real headless exports driven by their `.ptex` graphs, loaded through the framework's `MaterialMakerLoader`, including a packed ORM map split across the ambient-occlusion, roughness and metallic channels. See [docs/material-maker.md](../../docs/material-maker.md).
-- **Generated 3D assets**: the orb mesh is an OBJ written by
-  `tools/gen_assets.py`, with a custom pulsing shader.
+- **Generated 3D assets**: the orb mesh is an OBJ written by `tools/gen_assets.py`, with a custom pulsing shader.
