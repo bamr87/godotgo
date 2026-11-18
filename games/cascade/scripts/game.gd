@@ -25,6 +25,12 @@ signal popped(count: int, points: int)
 const REASON_STUCK := "stuck"
 ## Paid on top of everything else for clearing the board down to nothing.
 const PERFECT_BONUS := 1000
+## A won board that jams with at most this many tiles left earns a near-clear
+## bonus; more than this and it earns nothing extra.
+const NEAR_CLEAR_MAX := 5
+## Paid per tile of headroom under [constant NEAR_CLEAR_MAX]: one stranded tile
+## pays the most, [constant NEAR_CLEAR_MAX] stranded tiles pay one step.
+const NEAR_CLEAR_STEP := 100
 
 ## Groups popped this round.
 var pops := 0
@@ -87,11 +93,28 @@ func record_pop(count: int) -> int:
 ## is a win whether or not a tile is left standing. The perfect-clear bonus is
 ## paid before the round closes, because [method Session.add_score] is refused
 ## once the state leaves [constant Session.State.PLAYING].
-func finish_board(cleared_all: bool) -> bool:
+##
+## [param leftover] is the tile count stranded on a board that did not clear. A
+## winning board with between one and [constant NEAR_CLEAR_MAX] left earns
+## [method near_clear_bonus], so the last few tiles still matter. A lost board
+## earns nothing for it.
+func finish_board(cleared_all: bool, leftover: int = 0) -> bool:
 	if not is_playing():
 		return false
 	if cleared_all:
 		add_score(PERFECT_BONUS)
+	elif objective_complete():
+		add_score(near_clear_bonus(leftover))
 	if objective_complete():
 		return win()
 	return lose(REASON_STUCK)
+
+
+## What stranding [param leftover] tiles pays on a won board:
+## [code](NEAR_CLEAR_MAX + 1 - leftover) * NEAR_CLEAR_STEP[/code], or 0 outside
+## 1..[constant NEAR_CLEAR_MAX]. Zero leftover is the perfect clear, which has its
+## own bonus.
+static func near_clear_bonus(leftover: int) -> int:
+	if leftover < 1 or leftover > NEAR_CLEAR_MAX:
+		return 0
+	return (NEAR_CLEAR_MAX + 1 - leftover) * NEAR_CLEAR_STEP
