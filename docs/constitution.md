@@ -6,11 +6,17 @@
 > Agents read this before [AGENTS.md](../AGENTS.md) conventions, the [PRD](../PRD.md), or the
 > [feature catalog](../features/features.yml). Ratified by merged PR; amended only per § 8.
 
-## 1. Mission
+## 1. Missions
 
-A Godot 4 game workspace: one reusable framework addon (`addons/godotgo`) symlinked into every game, five sample games that exercise it, project-aware tooling that verifies/tests/runs/exports every game identically, and a Claude Code integration that can build, test and improve them.
+GodotGo's direction is to become the ultimate open home for all things Godot game-making — data, tools, resources and transparency, gathered in one place that anyone can inspect and reuse.
 
-_Source: [PRD.md](../PRD.md)._
+1. **Provide data, tools, resources and transparency for all stakeholders, game developers, Godot practitioners and the general public.** Developers building Godot 4 games, AI agents working in a verifiable loop, and the general public are first-class audiences. The aim is a shared, open commons: the same framework, the same tools, and the same trail of evidence for everyone.
+2. **Make every Godot 4 project share one reusable framework and the same verifiable path to build, test, run and export.** The `addons/godotgo` framework, pin-able tooling, and sample games that exercise it are the starting point; verification stays deterministic across host, Docker and CI.
+3. **Put that workspace in every developer's and agent's hands, and make improving a game a loop anyone can run.** Serve it through project-aware tooling and a Claude Code integration that can build, test and improve every game the same way — an open toolkit for working with all things Godot game-making.
+
+These missions set the course; they do not claim the work is finished. They serve the PRD goals in §3: one shared framework and deterministic verification. The earlier mission paragraph is absorbed into these three. Every feature must trace to them.
+
+_Source: [../PRD.md](../PRD.md) §1.1._
 
 ## 2. Invariants (non-negotiable)
 
@@ -78,11 +84,9 @@ Every PR passes the checks the repo's guide names:
 
 This constitution changes only through a numbered record in [docs/amendments/](amendments/) (`NNNN-kebab-slug.md`, copied from [0000-template.md](amendments/0000-template.md)):
 
-1. **Propose** — open a PR that adds the record (`Status: proposed`) *and* the edit to this file it describes.
-   Name what it affects: constitution sections, PRD requirement ids, feature ids.
+1. **Propose** — open a PR that adds the record (`Status: proposed`) *and* the edit to this file it describes. Name what it affects: constitution sections, PRD requirement ids, feature ids.
 2. **Review** — the maintainer reviews; an agent never approves or merges its own amendment.
-3. **Ratify** — merging the PR ratifies it. The record says `Status: ratified` and `Ratified by:` the PR.
-   A rejected or withdrawn PR keeps its record with that status; numbers are never reused.
+3. **Ratify** — merging the PR ratifies it. The record says `Status: ratified` and `Ratified by:` the PR. A rejected or withdrawn PR keeps its record with that status; numbers are never reused.
 4. **Supersede** — a later amendment may replace an earlier one; mark the old record `superseded by NNNN`.
 
 Records are append-only history: fix a ratified rule with a new amendment, never by editing an old record. [0001](amendments/0001-ratify-constitution.md) ratifies this document.

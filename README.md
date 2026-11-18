@@ -1,6 +1,6 @@
 # GodotGo
 
-> Godot 4 game workspace: one reusable framework, five sample games and tooling that treats every project the same.
+> GodotGo's direction is to become the ultimate open home for all things Godot game-making: data, tools, resources and transparency, with one reusable framework, identical tooling for every game, and an agent-ready build-and-test loop for everyone ([constitution](docs/constitution.md) §1).
 
 [![CI](https://github.com/bamr87/godotgo/actions/workflows/ci.yml/badge.svg)](https://github.com/bamr87/godotgo/actions/workflows/ci.yml) [![License](https://img.shields.io/github/license/bamr87/godotgo)](LICENSE)
 
@@ -38,6 +38,8 @@ tools/docker.sh build && tools/docker.sh verify
 ```
 
 Optional lint and format: `python3 -m venv .venv && .venv/bin/pip install "gdtoolkit==4.*"`.
+
+Commit hooks: `python3 -m venv .venv && .venv/bin/pip install pre-commit && .venv/bin/pre-commit install`, once per clone. The virtualenv is there because Homebrew's Python and other PEP 668 installs refuse a plain `pip install`; `pipx install pre-commit && pre-commit install` works as well. Before each commit they check whitespace, YAML, every shell script (shellcheck), one paragraph per line in Markdown, and that the generated API reference and docs index are current; `pre-commit run --all-files` runs them on everything.
 
 ## The sample games
 

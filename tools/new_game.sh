@@ -9,27 +9,27 @@
 # tools/check.sh + tools/test.sh before the script returns.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 slug="${1:-}"
 shift || true
+if [[ ! "$slug" =~ ^[a-z][a-z0-9-]*$ ]]; then
+	godotgo_usage_error "the slug comes first, in lower-case letters, digits and dashes (got '$slug')"
+fi
 template="blank"
 title=""
 desc=""
 while [ $# -gt 0 ]; do
 	case "$1" in
-		--title) title="$2"; shift 2 ;;
-		--desc) desc="$2"; shift 2 ;;
-		--template) template="$2"; shift 2 ;;
-		*) echo "unknown option: $1" >&2; exit 2 ;;
+		--title) godotgo_need_value "$@"; title="$2"; shift 2 ;;
+		--desc) godotgo_need_value "$@"; desc="$2"; shift 2 ;;
+		--template) godotgo_need_value "$@"; template="$2"; shift 2 ;;
+		-*) godotgo_reject_option "$1" ;;
+		*) godotgo_usage_error "unexpected argument '$1'" ;;
 	esac
 done
 
-if [[ ! "$slug" =~ ^[a-z][a-z0-9-]*$ ]]; then
-	echo "usage: tools/new_game.sh <slug> [--title T] [--desc D] [--template blank]" >&2
-	echo "  slug must be lower-case letters, digits and dashes" >&2
-	exit 2
-fi
 dest="games/$slug"
 [ -e "$dest" ] && { echo "$dest already exists" >&2; exit 2; }
 [ -d "templates/$template" ] || { echo "no template '$template' in templates/" >&2; exit 2; }

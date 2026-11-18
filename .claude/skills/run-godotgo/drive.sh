@@ -21,7 +21,7 @@
 # so it proves a scene loads but cannot produce a pixel or read a score.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../../../tools/lib.sh"
-cd "$GODOTGO_ROOT"
+cd "$GODOTGO_ROOT" || exit 1
 
 game="${1:-}"
 steps="${2:-wait:60,shot:boot,state}"
@@ -66,6 +66,6 @@ godot --path '$proj' --audio-driver Dummy --script '/workspace/$driver_rel' \
 rc=${PIPESTATUS[0]}
 
 shots="$(find "$out" -name '*.png' -newermt '-2 minutes' 2>/dev/null | sort)"
-[ -n "$shots" ] && { echo "==> screenshots:"; echo "$shots" | sed 's/^/    /'; }
+[ -n "$shots" ] && { echo "==> screenshots:"; while IFS= read -r f; do echo "    $f"; done <<<"$shots"; }
 [ "$rc" -eq 0 ] || echo "==> driver exited $rc" >&2
 exit "$rc"

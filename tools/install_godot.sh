@@ -9,10 +9,18 @@
 # gitignored. The version comes from tools/lib.sh.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
 
+# Settled before anything is downloaded.
 force=0
-[ "${1:-}" = "--force" ] && force=1
+for arg in "$@"; do
+	case "$arg" in
+		--force) force=1 ;;
+		-*) godotgo_reject_option "$arg" ;;
+		*) godotgo_usage_error "unexpected argument '$arg'" ;;
+	esac
+done
+cd "$GODOTGO_ROOT" || exit 1
 
 tag="${GODOTGO_GODOT_VERSION}-${GODOTGO_GODOT_RELEASE}"
 dest="$GODOTGO_ROOT/.godot-bin"

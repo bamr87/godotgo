@@ -1,0 +1,68 @@
+# Pre-commit hooks for godotgo (UPS-QA-06). Install once per clone:
+#   python3 -m pip install pre-commit && pre-commit install
+# Run by hand: pre-commit run --all-files
+#
+# Files whose bytes belong to something else are left alone: the assets
+# tools/gen_assets.py writes (CI fails when they differ from a fresh run),
+# Godot's .import and .uid sidecars, Material Maker .ptex graphs, the generated
+# docs/reference/framework-api.md, release-please's CHANGELOG.md, the fleet
+# feedback widget in public/, and the hub-vendored tools/docs_index.py and
+# tools/unwrap-prose.py. There is no gdformat hook: gdtoolkit is optional here,
+# and tools/check.sh runs it when it is installed.
+exclude: |
+  (?x)^(
+    games/[^/]+/assets/(audio|models|textures)/.*|
+    framework/tests/fixtures/materials/demo/.*|
+    .*\.(import|uid|ptex)|
+    docs/reference/framework-api\.md|
+    CHANGELOG\.md|
+    public/.*|
+    tools/(docs_index|unwrap-prose)\.py
+  )$
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Not in the files Godot and Material Maker write: they end some with
+      # blank lines and put them back on the next save (the godot_ai.sh
+      # wire/unwire round trip adds one to project.godot too).
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        exclude: &tool-written ^((.*/)?project\.godot|games/[^/]+/materials/.*\.tres)$
+      - id: end-of-file-fixer
+        exclude: *tool-written
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Every shell script. .shellcheckrc points -x at tools/lib.sh.
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+        args: [-x, --severity=warning]
+
+  # The same checks the gates run. Each takes well under a second, so they run
+  # on every commit rather than guess which edits can make them stale.
+  - repo: local
+    hooks:
+      - id: markdown-oneline
+        name: markdown is one paragraph per line
+        entry: python tools/unwrap-prose.py --check --exclude '(^|/)SCHEMA\.md$' --exclude '(^|/)CHANGELOG\.md$'
+        language: python
+        pass_filenames: false
+        always_run: true
+      - id: framework-api
+        name: docs/reference/framework-api.md is current
+        entry: python tools/gen_framework_api.py --check
+        language: python
+        pass_filenames: false
+        always_run: true
+      - id: docs-index
+        name: the docs/README.md index is current
+        entry: python tools/docs_index.py --check
+        language: python
+        pass_filenames: false
+        always_run: true

@@ -7,12 +7,19 @@
 
 GODOTGO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# The tool that sourced this file, as an absolute path, so the CLI helpers at the
+# end can still print its usage after it has changed directory.
+GODOTGO_TOOL=""
+if [ -n "${BASH_SOURCE[1]:-}" ]; then
+	GODOTGO_TOOL="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)/${BASH_SOURCE[1]##*/}"
+fi
+
 # The Godot release this workspace targets, in one place. tools/install_godot.sh
 # fetches it, tools/docker.sh passes it as a build argument, and the CI action
 # reads it from here, so the host, the container and CI cannot drift apart.
 # Every project's config/features declares the matching feature level.
 GODOTGO_GODOT_VERSION="4.7.2"
-GODOTGO_GODOT_RELEASE="stable"
+export GODOTGO_GODOT_RELEASE="stable"
 
 # The Godot AI release this workspace integrates (github.com/hi-godot/godot-ai,
 # MIT). tools/install_godot_ai.sh fetches it into vendor/ and symlinks it into
@@ -235,4 +242,81 @@ godotgo_gdtool() {
 		return 0
 	fi
 	command -v "$name" 2>/dev/null || true
+}
+
+# ------------------------------------------------------------------ the CLI --
+# Every tool's usage is its own leading comment block, so --help cannot drift
+# from it, and every tool keeps the same contract (tests/test_cli.sh holds
+# them to it): -h/--help prints that block to stdout and exits 0 before any
+# work starts; a usage error (an unknown option, an option missing its value)
+# prints the reason and the usage to stderr and exits 2, the code
+# godotgo_resolve uses for a project that does not exist.
+
+# Prints a script's leading comment block, from line 2 up to the first line
+# that is not a comment, with the "# " stripped.
+#   godotgo_usage <script>
+godotgo_usage() {
+	local line n=0
+	[ -f "$1" ] || return 0
+	while IFS= read -r line || [ -n "$line" ]; do
+		n=$((n + 1))
+		[ "$n" -eq 1 ] && continue
+		case "$line" in
+			"#"*) line="${line#\#}"; printf '%s\n' "${line# }" ;;
+			*) return 0 ;;
+		esac
+	done <"$1"
+}
+
+# -h or --help among the arguments prints the calling tool's usage and exits 0.
+# Every tool calls it straight after sourcing this file, so asking for help
+# never starts anything. docker.sh and run.sh pass only their first argument,
+# because everything after docker.sh's command belongs to that command and
+# everything after run.sh's project goes to Godot.
+godotgo_help() {
+	local arg
+	for arg in "$@"; do
+		case "$arg" in
+			-h|--help) godotgo_usage "$GODOTGO_TOOL"; exit 0 ;;
+		esac
+	done
+	return 0
+}
+
+# A usage error: the reason and the calling tool's usage on stderr, then exit 2.
+godotgo_usage_error() {
+	{
+		echo "godotgo: $*"
+		echo ""
+		godotgo_usage "$GODOTGO_TOOL"
+	} >&2
+	exit 2
+}
+
+# An option the calling tool does not define. Taken for a project name or a
+# filter instead, it either fails with a misleading message or starts the wrong
+# work.
+godotgo_reject_option() {
+	godotgo_usage_error "unknown option '$1' (see --help)"
+}
+
+# For the tools that define no options: any argument starting with "-" is one
+# they do not know.
+godotgo_no_options() {
+	local arg
+	for arg in "$@"; do
+		case "$arg" in
+			-*) godotgo_reject_option "$arg" ;;
+		esac
+	done
+	return 0
+}
+
+# Fails a value-taking option given as the last argument. Call it first in the
+# option's case arm, with every remaining argument:
+#   --title) godotgo_need_value "$@"; title="$2"; shift 2 ;;
+# Without it, `shift 2` with one argument left shifts nothing and the parsing
+# loop spins forever.
+godotgo_need_value() {
+	[ $# -ge 2 ] || godotgo_usage_error "$1 needs a value"
 }

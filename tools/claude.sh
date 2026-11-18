@@ -30,7 +30,8 @@
 #   An interactive `claude` login on this machine also works.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 ATTEMPTS=3
 BUDGET=10
@@ -41,20 +42,20 @@ FOCUS=""
 
 die() { echo "claude.sh: $*" >&2; exit 2; }
 
-usage() { sed -n '2,32p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 2; }
-
 # ---------------------------------------------------------------- arguments --
-cmd="${1:-}"; shift || usage
+# Options are parsed before the claude CLI is looked for, so an option missing
+# its value fails at once, spends nothing and needs no CLI installed.
+[ $# -gt 0 ] || godotgo_usage_error "no command given"
+cmd="$1"; shift
 positional=()
 while [ $# -gt 0 ]; do
 	case "$1" in
-		--attempts) ATTEMPTS="$2"; shift 2 ;;
-		--budget) BUDGET="$2"; shift 2 ;;
-		--model) MODEL="$2"; shift 2 ;;
-		--focus) FOCUS="$2"; shift 2 ;;
+		--attempts) godotgo_need_value "$@"; ATTEMPTS="$2"; shift 2 ;;
+		--budget) godotgo_need_value "$@"; BUDGET="$2"; shift 2 ;;
+		--model) godotgo_need_value "$@"; MODEL="$2"; shift 2 ;;
+		--focus) godotgo_need_value "$@"; FOCUS="$2"; shift 2 ;;
 		--dry-run) DRY_RUN=1; shift ;;
 		--yes|-y) ASSUME_YES=1; shift ;;
-		-h|--help) usage ;;
 		*) positional+=("$1"); shift ;;
 	esac
 done
@@ -214,5 +215,5 @@ case "$cmd" in
 			"$slug" "$concept" "$slug")"
 		;;
 
-	*) usage ;;
+	*) godotgo_usage_error "unknown command '$cmd'" ;;
 esac
