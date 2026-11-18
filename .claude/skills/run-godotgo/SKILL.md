@@ -145,7 +145,6 @@ registers no move, so "3 taps, Moves 2" is the game working, not the driver fail
 
 ## The harness
 
-- `.claude/skills/run-godotgo/drive.sh` — wraps the container, Xvfb, the
-  lavapipe ICD and the audio flag. The thing you invoke.
+- `.claude/skills/run-godotgo/drive.sh` — wraps the container, Xvfb, the lavapipe ICD and the audio flag. The thing you invoke.
 - `.claude/skills/run-godotgo/driver.gd` — a `SceneTree` script: loads the
 scene, runs the step machine, injects input, captures PNGs, prints state. Its header documents the argument and step grammar.

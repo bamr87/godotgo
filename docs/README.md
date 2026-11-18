@@ -14,7 +14,7 @@ New to the workspace? Read [authoring-games.md](authoring-games.md) to build a g
 
 | Document | What it covers |
 | --- | --- |
-| [`AGENTS.md`](../AGENTS.md) | A workspace for building Godot 4 games: one shared framework addon, five sample games that exercise it, tooling that treats every project the same, and a Claude Code integration that can build, test and improve any of them. |
+| [`AGENTS.md`](../AGENTS.md) | GodotGo's direction is to become the ultimate open home for all things Godot game-making: data, tools, resources and transparency, with one reusable framework, identical tooling for every game, and an agent-ready build-and-test loop for… |
 | [`CHANGELOG.md`](../CHANGELOG.md) | Release history: the notable changes in each version, newest first. |
 | [`SECURITY.md`](../SECURITY.md) | Supported versions and how to report a vulnerability privately. |
 | [`PRD.md`](../PRD.md) | The product requirements for GodotGo: problem, users, goals and non-goals, features, requirements and proposed success measures. |

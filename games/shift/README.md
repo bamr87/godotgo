@@ -20,8 +20,7 @@ board, applies a move, pushes crates, spots the solved state and keeps an undo h
 `scripts/level_builder.gd` owns the symbol table and turns a parsed grid into a `Puzzle`; it can also render one back to text, which is how the tests assert on a whole board at once.
 - **`SaveSystem` for progress.** `scripts/progress_store.gd` keeps the fewest
 moves per level and which levels are complete, in a versioned JSON slot under `user://saves/`. A better solve replaces a worse one; a worse one does not.
-- **`Session` with no countdown.** `scripts/game.gd` starts every round with a
-  time limit of zero, so this is the game that walks the no-timer path.
+- **`Session` with no countdown.** `scripts/game.gd` starts every round with a time limit of zero, so this is the game that walks the no-timer path.
 - **No physics bodies.** The board is a grid of `Sprite2D`s positioned from cell
 coordinates by `scripts/board_view.gd`. There is not a single collision shape in the project, and `test_level.gd` asserts it.
 

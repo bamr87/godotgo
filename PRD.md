@@ -8,6 +8,17 @@ Derived from the README, agent docs, config and code in [`bamr87/godotgo`](https
 
 A Godot 4 game workspace: one reusable framework addon (`addons/godotgo`) symlinked into every game, five sample games that exercise it, project-aware tooling that verifies/tests/runs/exports every game identically, and a Claude Code integration that can build, test and improve them.
 
+
+## 1.1 Missions
+
+GodotGo's direction is to become the ultimate open home for all things Godot game-making — data, tools, resources and transparency, gathered in one place that anyone can inspect and reuse.
+
+1. **Provide data, tools, resources and transparency for all stakeholders, game developers, Godot practitioners and the general public.** Developers building Godot 4 games, AI agents working in a verifiable loop, and the general public are first-class audiences. The aim is a shared, open commons: the same framework, the same tools, and the same trail of evidence for everyone.
+2. **Make every Godot 4 project share one reusable framework and the same verifiable path to build, test, run and export.** The `addons/godotgo` framework, pin-able tooling, and sample games that exercise it are the starting point; verification stays deterministic across host, Docker and CI.
+3. **Put that workspace in every developer's and agent's hands, and make improving a game a loop anyone can run.** Serve it through project-aware tooling and a Claude Code integration that can build, test and improve every game the same way — an open toolkit for working with all things Godot game-making.
+
+These missions set the course; they do not claim the work is finished. They serve the PRD goals in §3: one shared framework and deterministic verification. The earlier mission paragraph is absorbed into these three. Every feature must trace to them.
+
 ## 2. Target users
 
 - Developers building small Godot 4 games who want a shared framework and tooling
@@ -49,6 +60,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | [GODOTGO-005](features/features.yml) | Docker image and CI verifying every project in parallel | shipped | [`docker/Dockerfile`](docker/Dockerfile) · [`README.md`](README.md) | TBD |
 | [GODOTGO-006](features/features.yml) | Claude Code settings | shipped | [`.claude/settings.json`](.claude/settings.json) · [`README.md`](README.md) | TBD |
 | [GODOTGO-007](features/features.yml) | PerfectPixel Studio sprite-sheet import | planned | [`framework/addons`](framework/addons) · [`PRD.md`](PRD.md) | FR4 |
+| [GODOTGO-008](features/features.yml) | Missions in constitution §1 | planned | [`docs/constitution.md`](docs/constitution.md) | §1.1 |
 
 **Requirement → feature trace**
 
@@ -58,6 +70,7 @@ Every user-facing capability has a stable id in the feature catalog [`features/f
 | FR2 | GODOTGO-003 |
 | FR1 | GODOTGO-003 |
 | FR4 | GODOTGO-007 |
+| §1.1 | GODOTGO-008 |
 <!-- features:end -->
 
 ## 5. Requirements

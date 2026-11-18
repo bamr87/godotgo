@@ -18,14 +18,59 @@ on:
         required: false
         type: string
 
+# Least privilege by default; each job below asks for what it needs.
+permissions:
+  contents: read
+
 jobs:
-  improve:
-    # Kill switch (fleet convention — bamr87/bamr87 docs/HARNESS-OPS.md): a scheduled
-    # agent must be disarmable from the repo's Variables, without a commit. The
-    # variable absent or anything but 'false' keeps the schedule on; a manual
-    # dispatch always runs.
+  # The improvement needs a Claude credential. Without one claude-code-action
+  # exits non-zero, which is how all six scheduled runs from 2026-09-14 to
+  # 2026-10-19 failed: each installed Godot and verified a project first, then
+  # went red for a missing credential rather than anything in the workspace.
+  # Ask first, so an absent secret is a skip, not a failure (and not a wasted
+  # Godot install either) — the same preflight claude-code-review.yml has.
+  #
+  # Kill switch (fleet convention — bamr87/bamr87 docs/HARNESS-OPS.md): a scheduled
+  # agent must be disarmable from the repo's Variables, without a commit. The
+  # variable absent or anything but 'false' keeps the schedule on; a manual
+  # dispatch always runs. Skipping this job skips the improvement that needs it.
+  preflight:
+    name: Claude credential present?
     if: ${{ github.event_name != 'schedule' || vars.CLAUDE_IMPROVE_ENABLED != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      armed: ${{ steps.probe.outputs.armed }}
+    steps:
+      - id: probe
+        env:
+          # A comparison, never the value: this prints true or false. Claude
+          # auth is OAuth only for now (bamr87/godotgo#28), so only the OAuth
+          # token arms the run; when the API key is back in force, add
+          # `|| secrets.ANTHROPIC_API_KEY != ''` here, as claude-code-review.yml has.
+          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          echo "armed=$ARMED" >> "$GITHUB_OUTPUT"
+          if [ "$ARMED" = "true" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is present — running the improvement."
+            exit 0
+          fi
+          echo "::warning title=Improve skipped::No CLAUDE_CODE_OAUTH_TOKEN on $GITHUB_REPOSITORY, so Claude cannot run the improvement. Skipping instead of failing."
+          {
+            echo "### Claude Improve skipped — no credential"
+            echo
+            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription). Claude auth is OAuth only for now, so the \`ANTHROPIC_API_KEY\` secret does not arm this run."
+            echo
+            echo "The fleet propagates this secret weekly from the hub (\`token-rotation.yml\`, bamr87/bamr87 \`docs/TOKEN-ROTATION.md\`)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  improve:
+    needs: preflight
+    if: ${{ needs.preflight.outputs.armed == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
       pull-requests: write
@@ -50,9 +95,36 @@ jobs:
       - name: Baseline verification
         run: tools/verify.sh "${{ steps.pick.outputs.project }}"
 
-      - uses: anthropics/claude-code-action@v1
+      # The credential comes from this repo's CLAUDE_AUTH_ORDER (ai_auth: in
+      # bamr87/bamr87 _data/fleet.yml) — a method NAME, never a secret, in the output.
+      - name: Choose the Claude credential (ai_auth order)
+        id: claude-auth
+        uses: bamr87/bamr87/.github/actions/claude-auth@v2
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          order: ${{ vars.CLAUDE_AUTH_ORDER }}
+          has-oauth: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      # The preflight saw a secret, but claude-auth found nothing usable in this
+      # repo's order (say, a CLAUDE_AUTH_ORDER that names only a rejected API
+      # key). Say so and skip the Claude step, rather than fail it.
+      - name: No usable Claude credential
+        if: steps.claude-auth.outputs.method == 'none'
+        env:
+          ORDER: ${{ steps.claude-auth.outputs.order }}
+        run: |
+          echo "::notice title=Improve skipped::claude-auth found no usable Claude credential in the order '$ORDER', so the improvement is skipped."
+          {
+            echo "### Claude Improve skipped — no usable credential"
+            echo
+            echo "claude-auth tried the order \`$ORDER\` (the \`CLAUDE_AUTH_ORDER\` repository variable, default \`oauth,api_key\`) and found nothing usable. Its warning above says which credential was missing or rejected."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: anthropics/claude-code-action@v1
+        if: steps.claude-auth.outputs.method != 'none'
+        with:
+          claude_code_oauth_token: ${{ steps.claude-auth.outputs.method == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          anthropic_api_key: ${{ steps.claude-auth.outputs.method == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           branch_prefix: "claude/improve-"
           prompt: |
             Improve the Godot project ${{ steps.pick.outputs.project }} in this workspace.
@@ -66,6 +138,17 @@ jobs:
             You are done when `tools/verify.sh ${{ steps.pick.outputs.project }}` passes.
             Then open a pull request describing the change and how you verified it.
             Do not make sweeping unrelated edits.
+          # The fleet's harness standard (bamr87/bamr87 _data/fleet.yml
+          # `harnesses.standard`): an exact model from the allowlist, never the
+          # action's default of the day, a turn cap and a dollar ceiling.
+          # TURN CAP, sized by rule and not from data: 15 USD / 0.15 USD per
+          # turn (the fleet's budget.usd_per_turn). The runs on record took
+          # 12 to 14 turns, but each ended inside a minute with permission
+          # denials and without a pull request, so they do not show what a
+          # finished improvement costs. Re-size it from num_turns once a run
+          # lands one.
           claude_args: |
+            --model claude-opus-5-5
+            --max-turns 100
             --allowedTools "Read,Glob,Grep,Edit,Write,MultiEdit,Bash(tools/check.sh*),Bash(tools/test.sh*),Bash(tools/smoke.sh*),Bash(tools/verify.sh*),Bash(tools/godot.sh --headless*),Bash(python3 tools/gen_assets.py*),Bash(git status*),Bash(git diff*)"
             --max-budget-usd 15

@@ -25,7 +25,8 @@
 # which project currently has it instead of pretending otherwise.
 set -o pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
-cd "$GODOTGO_ROOT"
+godotgo_help "$@"
+cd "$GODOTGO_ROOT" || exit 1
 
 ADDON_DIR="$GODOTGO_ROOT/vendor/godot_ai"
 
@@ -225,8 +226,6 @@ doctor)
 	;;
 
 *)
-	echo "unknown command: $cmd" >&2
-	sed -n '2,/^set -o/p' "$0" | sed '$d' >&2
-	exit 2
+	godotgo_usage_error "unknown command '$cmd'"
 	;;
 esac
