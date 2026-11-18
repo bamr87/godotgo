@@ -18,17 +18,57 @@ on:
         required: false
         type: string
 
-# Least privilege by default; the job below asks for what it needs.
+# Least privilege by default; each job below asks for what it needs.
 permissions:
   contents: read
 
 jobs:
-  improve:
-    # Kill switch (fleet convention — bamr87/bamr87 docs/HARNESS-OPS.md): a scheduled
-    # agent must be disarmable from the repo's Variables, without a commit. The
-    # variable absent or anything but 'false' keeps the schedule on; a manual
-    # dispatch always runs.
+  # The improvement needs a Claude credential. Without one claude-code-action
+  # exits non-zero, which is how all six scheduled runs from 2026-09-14 to
+  # 2026-10-19 failed: each installed Godot and verified a project first, then
+  # went red for a missing credential rather than anything in the workspace.
+  # Ask first, so an absent secret is a skip, not a failure (and not a wasted
+  # Godot install either) — the same preflight claude-code-review.yml has.
+  #
+  # Kill switch (fleet convention — bamr87/bamr87 docs/HARNESS-OPS.md): a scheduled
+  # agent must be disarmable from the repo's Variables, without a commit. The
+  # variable absent or anything but 'false' keeps the schedule on; a manual
+  # dispatch always runs. Skipping this job skips the improvement that needs it.
+  preflight:
+    name: Claude credential present?
     if: ${{ github.event_name != 'schedule' || vars.CLAUDE_IMPROVE_ENABLED != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      armed: ${{ steps.probe.outputs.armed }}
+    steps:
+      - id: probe
+        env:
+          # A comparison, never the value: this prints true or false. Claude
+          # auth is OAuth only for now (bamr87/godotgo#28), so only the OAuth
+          # token arms the run; when the API key is back in force, add
+          # `|| secrets.ANTHROPIC_API_KEY != ''` here, as claude-code-review.yml has.
+          ARMED: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          echo "armed=$ARMED" >> "$GITHUB_OUTPUT"
+          if [ "$ARMED" = "true" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is present — running the improvement."
+            exit 0
+          fi
+          echo "::warning title=Improve skipped::No CLAUDE_CODE_OAUTH_TOKEN on $GITHUB_REPOSITORY, so Claude cannot run the improvement. Skipping instead of failing."
+          {
+            echo "### Claude Improve skipped — no credential"
+            echo
+            echo "Add a \`CLAUDE_CODE_OAUTH_TOKEN\` secret (\`claude setup-token\` with a Pro, Max, Team or Enterprise subscription). Claude auth is OAuth only for now, so the \`ANTHROPIC_API_KEY\` secret does not arm this run."
+            echo
+            echo "The fleet propagates this secret weekly from the hub (\`token-rotation.yml\`, bamr87/bamr87 \`docs/TOKEN-ROTATION.md\`)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  improve:
+    needs: preflight
+    if: ${{ needs.preflight.outputs.armed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -65,7 +105,23 @@ jobs:
           has-oauth: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
           api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 
+      # The preflight saw a secret, but claude-auth found nothing usable in this
+      # repo's order (say, a CLAUDE_AUTH_ORDER that names only a rejected API
+      # key). Say so and skip the Claude step, rather than fail it.
+      - name: No usable Claude credential
+        if: steps.claude-auth.outputs.method == 'none'
+        env:
+          ORDER: ${{ steps.claude-auth.outputs.order }}
+        run: |
+          echo "::notice title=Improve skipped::claude-auth found no usable Claude credential in the order '$ORDER', so the improvement is skipped."
+          {
+            echo "### Claude Improve skipped — no usable credential"
+            echo
+            echo "claude-auth tried the order \`$ORDER\` (the \`CLAUDE_AUTH_ORDER\` repository variable, default \`oauth,api_key\`) and found nothing usable. Its warning above says which credential was missing or rejected."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - uses: anthropics/claude-code-action@v1
+        if: steps.claude-auth.outputs.method != 'none'
         with:
           claude_code_oauth_token: ${{ steps.claude-auth.outputs.method == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
           anthropic_api_key: ${{ steps.claude-auth.outputs.method == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
