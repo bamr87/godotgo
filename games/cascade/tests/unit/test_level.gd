@@ -156,11 +156,14 @@ func test_the_next_level_is_locked_until_the_board_is_beaten() -> void:
 
 
 func test_the_last_level_wraps_round_to_the_first() -> void:
+	# Reading-order play beats the last board too (test_level_builder.gd holds
+	# every level to being beatable), so this asserts the wrap rather than
+	# passing quietly when the board is lost.
 	_level.load_level(LevelBuilder.level_count())
 	play_out()
-	if Game.state == Session.State.WON:
-		assert_true(_level.next_level())
-		assert_eq(_level.level_number, 1)
+	assert_eq(Game.state, Session.State.WON, "the last board was beaten")
+	assert_true(_level.next_level())
+	assert_eq(_level.level_number, 1)
 
 
 func test_restarting_rebuilds_the_very_same_board() -> void:
